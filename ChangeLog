@@ -1,0 +1,63 @@
+0.4:
+    * Show all 5 days of weather forecast icons
+    * Show the day of the forecast icon
+    * Exchange forecast icons with http://www.alessioatzeni.com/meteocons/
+    * Change default daemon mode interval to 60 minutes, to respect yahoos 60 minutes ttl
+    * Provide Makefile to generate translation, and to ease integration into distros (hopefully)
+    * Fix geoip-lookup by changing API to http://freegeoip.net/
+    * (Note: Moved project to github)
+
+0.3:
+    * Switched to Yahoo! Weather Api, Google closed its own
+      * Ship forecast icons (http://harwenzhang.deviantart.com/art/weather-110757031)
+      * Forecast only of today and tomorrow
+      * Disabled wind-display
+      * Removed some states (overcast, partly sunny, rain showers)
+      * Added category windy, including torandoes and hurricanes
+    * Disabled swiss weather-radar because the source-image is down
+
+0.2.7:
+    * Translated and better formatted osd-messages
+    * Bugfix: Died when it was 12:00
+    * Don't reselect the wallpaper if already active (note that dynamic features
+      like temperature-display may still trigger the reselect)
+
+0.2.6.2:
+    * Show radar and warning-images of your country
+    * Automatically select a command to set the wallpaper if none is given
+    * Bugfix: Died when it was 12:xx 
+0.2.6:
+    * Automatically discover the name of the city if none is given
+
+0.2.5.3:
+    * Fixed convert trying to write to images in /usr/share/izulu when 
+      displaying the temperature
+    * Added "Rain Showers"
+    * Added "Heavy Rain"
+0.2.5:
+    * Replace " " with + in city names for google
+    * Added display of current temperature
+    * Use WOEID for yahoo, fetch it automatically if not given
+     * REMOVED: YAHOOID from the config
+    * Additional use of xml_grep (part of xml-twig-tools in Ubuntu) instead of 
+      xmlstarlet because the latter refused to work with Yahoos woeid-API        
+
+0.2:
+    * Add small forecast-icons to the south-eastern edge of the wallpaper
+
+0.1.9:
+    * On weather-change, send notifyOSD-popup (requires libnotify-bin). 
+
+0.1.8:
+    * The weathercodes "drizzle" and "haze" are now recognized
+    * Long parameter-names included
+    * Detection of sunset and sunrise via Yahoo to change pictures accordingly
+
+0.1.5:
+    * Included funtion to randomly select an image out of a directory
+
+0.1.1:
+    * Fixed "Light Rain" to "Light rain"
+    * Changed filenames of specific weather-images into a logical scheme
+0.1:
+    initial release

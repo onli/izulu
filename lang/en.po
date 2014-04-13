@@ -1,0 +1,62 @@
+msgid "partly_sunny"
+msgstr "Weather: Partly Sunny"
+
+msgid "mostly_sunny"
+msgstr "Weather: Mostly Sunny"
+
+msgid "clear"
+msgstr "Weather: Clear"
+
+msgid "partly_cloudy"
+msgstr "Weather: Partly Cloudy"
+
+msgid "mostly_cloudy"
+msgstr "Weather: Mostly Cloudy"
+
+msgid "cloudy"
+msgstr "Weather: Cloudy"
+
+msgid "overcast"
+msgstr "Weather: Overcast"
+
+msgid "chance_of_rain"
+msgstr "Weather: Chance of Rain"
+
+msgid "drizzle"
+msgstr "Weather: Drizzle"
+
+msgid "light_rain"
+msgstr "Weather: Light Rain"
+
+msgid "showers"
+msgstr "Weather: Showers"
+
+msgid "rain_showers"
+msgstr "Weather: Rain Showers"
+
+msgid "rain"
+msgstr "Weather: Rain"
+
+msgid "heavy_rain"
+msgstr "Weather: Heavy Rain"
+
+msgid "thunderstorm"
+msgstr "Weather: Thunderstorm"
+
+msgid "sleet"
+msgstr "Weather: Sleet"
+
+msgid "light_snow"
+msgstr "Weather: Light Snow"
+
+msgid "snow"
+msgstr "Weather: Snow"
+
+msgid "snow_showers"
+msgstr "Weather: Snow Showers"
+
+msgid "fog"
+msgstr "Weather: Fog"
+
+msgid "haze"
+msgstr "Weather: Haze"

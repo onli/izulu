@@ -1,0 +1,60 @@
+.TH "IZULU" "1" "December 02, 2009" "Malte Paskuda" ""
+.SH "NAME"
+izulu
+.SH "SYNOPSIS"
+Set the wallpaper according to the weather
+
+.SH "DESCRIPTION"
+This manual page documents briefly the
+.B izulu
+command.
+.PP 
+\fBizulu\fP is a tool to change the wallpaper according to the weather. Therefore it reads the Weather API of Yahoo.
+.SH "OPTIONS"
+.TP 
+.B \-c "city"
+Set the city with the relevant weather, e.g Berlin.
+.TP 
+.BI \-d
+Enable daemon\-mode, check the weather every 60 minutes.
+.TP 
+.B \-i "interval"
+Specify a custom check\-interval when in daemon\-mode, e.g. 900 (seconds).
+.TP 
+.BI \-n
+Activate night\-mode, different images will be used at night.
+.TP 
+.BI \-p
+Show the forecast in small preview\-icons.
+.TP 
+.BI \-r
+Choose the wallpaper randomly, only works when the directory is named in the config.
+.TP 
+.BI \-t 
+Show the temperature
+.TP 
+.BI \-w
+Enter the WOEID, only necessary if automatic detection fails. The WOEID is used by Yahoo to recognize the location.
+.TP 
+.TP 
+The command to change the wallpaper, the directories for the random\-mode, the WOEID and the city to check the weather by default may be changed in the config.
+.SH "FILES"
+It uses a directory .izulu in home directory and /usr/share/izulu. To override the used images, save them in .izulu in the homedirectory with the name gen_sun, gen_cloud, gen_rain, gen_snow or gen_misc, which are also the images used if no specific image exists.
+To use further distinct images, save them as:
+
+sun: partly_sunny, mostly_sunny, clear
+
+clouds: partly_cloudy, mostly_cloudy, cloudy, overcast
+
+rain: chance_of_rain, light_rain, showers, rain
+
+snow: sleet, snow_showers
+
+misc: fog
+
+Append "_night" to let them be used at night.
+
+Options can be changed permanent if stored in .izulu/config.
+.SH "AUTHOR"
+This manual page was written by Malte Paskuda <MPaskuda@web.de>,
+and may be used by others.

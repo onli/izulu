@@ -1,0 +1,781 @@
+#!/bin/bash
+
+# izulu - Change the wallpaper according to the weather
+#
+# Copyright (C) 2009 Malte Paskuda
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the 
+# Free Software Foundation; either version 3 of the License, or (at your
+# option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but 
+# WITHOUT ANY WARRANTY; without even the implied warranty of 
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License 
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
+
+# get current weather
+# $1: city to look for
+# return: current weather
+getWeather() {
+    local woeid="$1"
+    
+    local api_output=$(getYahooXML "$woeid")
+    echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m '/rss/channel/item/yweather:condition' -v '@code'
+}
+
+# get WOEID uesed for as location by Yahoo
+# $1: city
+# return: WOEID
+getYahooWOEID() {
+    local city="$1"
+    
+    appid="LEQaKB_V34Gzu4on4L8hrqQSisKQ0H_ixtcixDoSZFA3yznADUGphzvJSdKZ0vBIJunqxchI1m0-"
+    woeid=$(wget -O - -q "http://where.yahooapis.com/v1/places.q($city)?appid=$appid")
+    
+    echo "$woeid" | xml_grep --text_only '/places/place/woeid'
+}
+
+# get current weather from yahoo
+# $1: woeid
+# return: full xml-response
+getYahooXML() {
+    local woeid="$1"
+    
+    local yahooWeather=$(wget -O - -q "http://weather.yahooapis.com/forecastrss?w=$woeid&u=c")
+    echo "$yahooWeather"
+}
+
+# get date of sunrise from yahoo
+# $1: output of the yahoo weather feed
+# return: sunrise
+getSunrise() {
+    local api_output="$1"
+    
+    echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m '/rss/channel/yweather:astronomy' -v '@sunrise'
+}
+
+# get date of sunset from yahoo
+# $1: output of the yahoo weather feed
+# return: sunset
+getSunset() {
+    local api_output="$1"
+
+    echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m '/rss/channel/yweather:astronomy' -v '@sunset'
+}
+
+# map forecast-code to one of the icons
+chooseForecastIcon() {
+    forecast="$1"
+    case "$forecast" in
+        "19" | "20" | "21" | "22" | "23" | "24" | "25" | "26")
+            echo "forecast_cloud"
+            ;;
+        "27" | "28" | "29" | "30" | "33" | "34" | "44")
+            echo "forecast_sunnycloud"
+            ;;
+        "6" | "8" | "9" | "10" | "11" | "12" | "17" | "18" | "35" | "40")
+            echo "forecast_rain"
+            ;;
+        "31" | "32" | "36")
+            echo "forecast_sun"
+            ;;
+        "5" | "7" | "13" | "14" | "15" | "16" | "41" | "42" | "43" | "46")
+            echo "forecast_snow"
+            ;;
+        "0" | "1" | "2" | "3" | "4" | "37" | "38" | "39" | "45" | "47")
+            echo "forecast_thunderstorm"
+            ;;
+    esac
+
+}
+
+# set the wallpaper according to the weather
+# $1: current weather
+chooseWallpaper() {
+    local weather="$1"
+    
+    case "$weather" in
+        # Sun:
+        "33" | "34")
+            setWallpaper "mostly_sunny" "gen_sun"
+            ;;
+       
+        "31" | "32" | "36")
+            setWallpaper "clear" "gen_sun"
+            ;;
+
+        # Clouds:
+        "29" | "30" | "44")
+            setWallpaper "partly_cloudy" "gen_cloud"
+            ;;
+       
+        "27" | "28")
+            setWallpaper "mostly_cloudy" "gen_cloud"
+            ;;
+
+        "26")
+            setWallpaper "cloudy" "gen_cloud"
+            ;;
+
+        # Rain:
+        "40")
+            setWallpaper "chance_of_rain" "gen_rain"
+            ;;
+
+        "9" | "8")
+            setWallpaper "drizzle" "gen_rain"
+            ;;
+          
+        "6")
+            setWallpaper "light_rain" "gen_rain"
+            ;;
+
+        # "Showers")
+        "11" | "12")
+            setWallpaper "showers" "gen_rain"
+            ;;
+        "10")
+            setWallpaper "rain" "gen_rain"
+            ;;
+        # "Hail")
+        "17" | "35")
+            setWallpaper "hail" "gen_rain"
+            ;;
+        # "Thunderstorm")
+        "4" | "3" | "37" | "38" | "39" | "44" | "45" | "47") 
+            setWallpaper "thunderstorm" "gen_rain"
+            ;;
+
+        # Snow:
+        "18" | "7")
+            setWallpaper "sleet" "gen_snow"
+            ;;
+        "14"| "5" |"25")
+            setWallpaper "light_snow" "gen_snow"
+            ;;
+            
+        "16" | "13" | "15" | "41" | "43")
+            setWallpaper "snow" "gen_snow"
+            ;;
+
+        "46" | "42")
+            setWallpaper "snow_showers" "gen_snow"
+            ;;
+       
+        # Wind:
+        "23" | "24")
+            setWallpaper "windy" "gen_wind"
+            ;;
+        "0")
+            setWallpaper "tornado" "gen_wind"
+            ;;
+        "1")
+            setWallpaper "tropicalstorm" "gen_wind"
+            ;;
+        "2")
+            setWallpaper "hurricane" "gen_wind"
+            ;;
+       
+        # Misc:
+        "19")
+            setWallpaper "dust" "gen_misc"
+            ;;
+        "20")
+            setWallpaper "fog" "gen_misc"
+            ;;
+        "21")
+            setWallpaper "haze" "gen_misc"
+            ;;
+        "22")
+            setWallpaper "smoky" "gen_misc"
+            ;;
+        *)
+            if [ "$LOG" == "TRUE" ];then
+                echo "^-> UNKNOWN!" >> "$HOME"/izululog
+            fi
+            ;;
+    esac
+}
+
+#Choose the wallpaper
+#$1: the image for the specific state
+#$2: the image for the generic state, fallback
+#$3: If set to anything, random-mode will not be triggered 
+setWallpaper() {
+    local specific="$1"
+    local generic="$2"
+    local random_override="$3"
+    
+    if [[ -n "$current" ]];then
+        if [ "$current" == "$specific" ];then
+            if [ ! "$TEMPERATURE" == "TRUE" ] && [ ! "$SWISS_RADAR" == "TRUE" ] && [ ! "$GERMAN_RADAR" == "TRUE" ] && [ ! "$RADAR" == "TRUE" ];then
+                #no dynamic features, so no change necessary
+                return
+            fi
+        fi
+    fi
+    current="$specific"
+
+    if [ "$RANDOMLY" == "TRUE" ] && [[ -z "$random_override" ]];then
+        random_image=$(cycleWallpaper "$specific" "$generic")
+        if [[ -n "$random_image" ]];then
+            setImage "$random_image" &
+        fi
+        return
+    fi
+
+    if ! isDay &&  [ "$NIGHT" == "TRUE" ];then
+        image_specific="$specific"_night
+        image_generic="$generic"_night
+    else 
+        image_specific="$specific"
+        image_generic="$generic"
+    fi
+    
+    if [[ -e "$HOME"/.izulu/"$image_specific" ]];then
+        setImage "$HOME"/.izulu/"$image_specific" 
+    else
+        if [[ -e /usr/share/izulu/"$image_specific" ]];then
+            setImage /usr/share/izulu/"$image_specific"
+        else
+            if [[ -e "$HOME"/.izulu/"image_generic" ]];then
+                setImage "$HOME"/.izulu/"$image_generic" 
+            else
+                setImage /usr/share/izulu/"$image_generic"
+            fi
+        fi
+    fi
+    
+    if [ "$OSD" == "TRUE" ];then
+        osdNotify "$specific"
+    fi
+}
+
+# set the Wallpaper
+# $1 the wallpaperfile
+setImage() {
+    local api_output=$(getYahooXML "$WOEID")
+    local tmpimage=$(mktemp)
+    # store for later merge - and to be able to write
+    cp "$1"  "$tmpimage"
+    if [ "$PREVIEW" == "TRUE" ];then
+        for i in {1..5};do
+            # merge preview-icons with background-image
+            local forecast=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/rss/channel/item/yweather:forecast[$i]" -v '@code')
+            local icon=$(chooseForecastIcon "$forecast")
+            local tmpicon=$(mktemp)
+            cp "/usr/share/izulu/$icon" "$tmpicon"
+            local day=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/rss/channel/item/yweather:forecast[$i]" -v '@day')
+            convert "$tmpicon" -gravity South -background '#0000' -fill grey -font Helvetica -pointsize 16 -splice 0x24  -annotate +0+2 "$day" "$tmpicon"
+            
+            # at least +20 y height to be above typical taskbar
+            convert -depth 8 -gravity SouthEast -geometry +$((330-i*64))+20 "$tmpimage" "$tmpicon" -composite "$tmpimage"
+            # TODO: Center text
+            # convert -gravity SouthEast "$tmpimage" -font Helvetica -antialias -pointsize 16 -fill grey -draw "text $((335-i*64)),20 $day" "$tmpimage"
+            
+        done
+    fi
+
+    if [ "$TEMPERATURE" == "TRUE" ];then
+        local temperature=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/rss/channel/item/yweather:condition" -v '@temp')
+        convert -gravity SouthWest "$tmpimage" -font Helvetica -pointsize 36 -fill grey -annotate 0x20+20+20 "$temperature °C" "$tmpimage"
+    fi
+    
+    addRadar "$tmpimage"
+    
+    cp "$tmpimage" "$HOME"/.izulu/izulucurrent
+    rm "$tmpimage"
+    if [  "${WPCOMMAND:${#WPCOMMAND}-1}" == "/" ];then
+        ${WPCOMMAND}"$HOME/.izulu/izulucurrent" &
+    else
+        $WPCOMMAND "$HOME/.izulu/izulucurrent" &
+    fi
+}
+
+addRadar() {
+    local tmpimage="$1"
+    if [ "$SWISS_RADAR" == "TRUE" ];then
+        addSwissImage "$tmpimage" warning radar
+        return
+    fi
+    if [ "$GERMAN_RADAR" == "TRUE" ];then
+        addGermanImage "$tmpimage" warning radar
+        return
+    fi
+    if [ "$RADAR" == "TRUE" ];then
+        if contains "${RADAROPTIONS[*]}" "germany";then
+            local country="DE"
+        elif contains "${RADAROPTIONS[*]}" "swiss";then
+            local country="CH"
+        else
+            local country=$(getCountry)
+        fi
+        if ! contains "${RADAROPTIONS[*]}" "radar" &&  ! contains "${RADAROPTIONS[*]}" "warning";then
+            local options=("warning" "radar")
+        else
+            local options=()
+            for image in ${RADAROPTIONS[*]};do
+                if [ "$image" == "radar" ] || [ "$image" == "warning" ];then
+                    options[${#options[*]}]="$image"
+                fi
+            done
+        fi
+        if [ "$country" == "DE" ];then
+            addGermanImage "$tmpimage" ${options[*]}
+        elif [ "$country" == "CH" ];then
+            addSwissImage  "$tmpimage" ${options[*]} 
+        fi
+    fi
+}
+
+addGermanImage() {
+    local i=0
+    local tmpimage="$1"
+    for image in $*;do
+        let i++
+        if [ "$image" == "warning" ];then
+            local wetteralarm=$(mktemp)
+            wget -O - -q http://www.dwd.de/dyn/app/ws/maps/DE_teaser_x_x_0.gif > "$wetteralarm"
+            convert "$wetteralarm" -resize 178 "$wetteralarm"
+            if [ $i == 2 ];then
+                composite -gravity SouthEast -geometry +2+128 "$wetteralarm" "$tmpimage" "$tmpimage"
+            else
+                composite -gravity SouthEast -geometry +2+377 "$wetteralarm" "$tmpimage" "$tmpimage"
+            fi
+            rm "$wetteralarm"
+        fi
+        if [ "$image" == "radar" ];then
+            local radarimage=$(mktemp)
+            wget -O - -q ftp://ftp.dfd.dlr.de/put/wetterbilder/Central_Europe/image1.jpg > "$radarimage"
+            #grab germany from the image of europe:
+            convert "$radarimage" -crop 650x900+274+120 "$radarimage"
+            convert "$radarimage" -resize 178 "$radarimage"
+            if [ $i == 2 ];then
+                composite -gravity SouthEast -geometry +2+128 "$radarimage" "$tmpimage" "$tmpimage"
+            else
+                composite -gravity SouthEast -geometry +2+367 "$radarimage" "$tmpimage" "$tmpimage"
+            fi
+            rm "$radarimage"
+        fi
+    done
+}
+
+addSwissImage() {
+    local i=0
+    local tmpimage="$1"
+    for image in $*;do
+        let i++
+        if [ "$image" == "warning" ];then
+            local wetteralarm=$(mktemp)
+            wget -O - -q http://www.wetteralarm.ch/uploads/tx_namicswawetterkarte/bilder/wetterkarten/all_klein.jpg > "$wetteralarm"
+            convert "$wetteralarm" -resize 178 "$wetteralarm"
+            if [[ $i -eq 2 ]];then
+                composite -gravity SouthEast -geometry +2+128 "$wetteralarm" "$tmpimage" "$tmpimage"
+            else    
+                composite -gravity SouthEast -geometry +2+245 "$wetteralarm" "$tmpimage" "$tmpimage"
+            fi
+            rm "$wetteralarm"
+        fi
+    done
+}
+
+contains() {
+    list=("$1")
+    element="$2"
+    if [ "$(echo ${list[*]} | grep "$element")" == "" ];then
+        return 1
+    else
+        return 0
+    fi
+}
+
+#send onscreen-notfication if weather changed
+#$1: message, new weather-state
+osdNotify() {
+    if [[ -z "$last_state" ]] || [ "$last_state" != "$1" ];then
+        if command -v notify-send > /dev/null;then
+           notify-send "izulu" "$(gettext "$1")"
+        else
+            echo "notify-send not installed, but osd via -o requested." \
+                 "Install libnotify-bin to use the osd."
+        fi
+    fi
+    last_state="$1"
+}
+
+#choose randomly a wallpaper
+#$1: wallpaper-category
+#return: wallpaper to set
+cycleWallpaper() {
+    local specific="$1"
+    local generic="$2"
+
+    case "$generic" in
+        "gen_sun")      
+            RANDOMDIR="$RANDOMSUNDIR"
+            ;;
+        "gen_cloud")
+            RANDOMDIR="$RANDOMCLOUDDIR"
+            ;;
+        "gen_rain")
+            RANDOMDIR="$RANDOMRAINDIR"
+            ;;
+        "gen_snow")
+            RANDOMDIR="$RANDOMSNOWDIR"
+            ;;
+        "gen_misc")
+            RANDOMDIR="$RANDOMMISCDIR"
+            ;;
+    esac        
+
+    if [[ -z "$RANDOMDIR" ]];then
+        setWallpaper "$specific" "$generic" "TRUE"
+        return 1
+    fi    
+    local pictures=()
+    for picture in "$RANDOMDIR"/*;do
+        pictures+=("$picture")
+    done
+    local chosen=$RANDOM
+    let "chosen %= ${#pictures[*]}"
+    echo "${pictures[$chosen]}"
+}
+
+
+#get current time via the last_build_date, which is not necesseraly the
+#current time
+getCurrentTime() {
+    local api_output="$1"
+    
+    local build_date=$(echo "$api_output" | xmlstarlet sel -t -m /rss/channel/lastBuildDate -v '.')
+    local build_time=$(echo $build_date | sed 's/.*\(..:.....\).*/\1/')
+    
+#12:20 pm hast to be caught and converted to 00:20 pm
+    if [ "$(echo ${build_time:6})" = "pm" ] && [ "$(echo ${build_time:0:2})" = "12" ];then
+        build_time="${build_time/12/00}"
+    fi
+   
+#12:20 am hast to be caught and converted to 00:20 am
+    if [ "$(echo ${build_time:6})" = "am" ] && [ "$(echo ${build_time:0:2})" = "12" ];then
+        build_time="${build_time/12/00}"
+    fi
+    
+    build_time=$(makeComparable "$build_time")
+        
+    echo "$build_time"
+}
+
+#Check if currently daylight is seen
+isDay() {
+    #if $YAHOOID not set, it would otherwise be always night
+    if  [[ -z "$WOEID" ]];then
+        return 0
+    fi
+    local api_output=$(getYahooXML "$WOEID")
+    
+    #if yahoo unreachable it is day for now
+    if [[ -z "$api_output" ]];then
+        return 0
+    fi
+    local build_time=$(getCurrentTime "$api_output")
+    
+    #set cur_time at the first iteration:
+    if [[ -z "$cur_time" ]];then
+        cur_time="$build_time"
+    fi
+
+    local sunrise=$(getSunrise "$api_output")
+    local sunset=$(getSunset "$api_output")
+   
+    sunrise=$(makeComparable "$sunrise")
+    sunset=$(makeComparable "$sunset")
+
+    #Sounds strange, but some cities don't build the rss-feed over
+    #night, the last time a few minutes before sunset. First Workaround:
+    local sunset=$((sunset - 5))
+    
+    #Second Workaround, for daemon-mode: If build_time equals 
+    #last_build_time, then add interval to cur_time
+    if [[ "$build_time" -eq "$last_build_time" ]];then
+        if [[ -z "$INTERVAL" ]];then
+            INTERVAL=900
+        fi
+        local minute_interval=$(($INTERVAL / 60))
+        cur_time=$(timeadd $cur_time $minute_interval)
+    else
+        cur_time="$build_time"
+    fi
+     last_build_time="$build_time"
+    
+    if [[ $cur_time -gt $sunrise ]] && [[ $cur_time -lt $sunset ]];then
+        #it's day
+        return 0
+    else
+        #it's night
+        return 1
+    fi
+}
+
+#translate a time in format 08:33 pm into 0833, add 1200 if pm and 
+#convert in minutes NOTE: Probably should've used date
+#$1: the time
+#return: comparable time in minutes
+makeComparable() {
+    local time="$1"
+
+    if [[ -n "$(echo $time | grep am)" ]];then
+        #it's am
+        #remove all non-digits:
+        time=${time//[a-z: ]/}
+    else
+        #it's pm, must add 1200
+        time=${time//[a-z: ]/}
+        time=$((10#$time + 1200))
+    fi
+    local length=${#time}
+    if [[ "$length" -eq 3 ]];then
+        #1:30
+        local hours=${time:0:1}
+        local minutes=${time:1:2}
+    else
+        #11:30
+        local hours=${time:0:2}
+        local minutes=${time:2:2}
+    fi
+    time=$((10#$hours * 60 + 10#$minutes))
+    echo $time
+}
+
+#add time in minutes, react to overflow at 1440
+timeadd() {
+    local time=$(($1 + $2))
+    if [[ $time -gt 1440 ]];then
+        time=$((10#$time - 1440))
+    fi
+    echo $time
+}
+
+#daemon-mode
+monitor() {
+    while true;do
+        if [[ -z "$INTERVAL" ]];then
+            INTERVAL=3600   # ttl in yahoo xml is 60 minutes, so use this as default
+        fi
+        
+        sleep $INTERVAL
+        
+        local weather=$(getWeather "$WOEID")
+        if [[ "$LOG" == "TRUE" ]];then
+            echo "$weather" >> "$HOME"/izululog
+        fi
+        chooseWallpaper "$weather"
+    done
+}
+
+
+setWOEID() {
+    local city="$1"
+    if [[ -z "$WOEID" ]];then
+        WOEID=$(getYahooWOEID "$city")
+    fi
+}
+
+#determine the city via the geoip-api
+getCity() {
+    ipApiLookup=$(wget -O - -q "http://freegeoip.net/xml/")
+    local city=$(echo "$ipApiLookup" | xml_grep --text_only '/Response/City')
+    if command -v notify-send >/dev/null;then
+        notify-send -u low "izulu" "$city"
+    fi
+    echo $city
+}
+
+#determine the county via the geoip-api
+getCountry() {
+    ipApiLookup=$(wget -O - -q "http://freegeoip.net/xml/")
+    local country=$(echo "$ipApiLookup" | xml_grep --text_only '/Response/CountryCode')
+    #if command -v notify-send >/dev/null;then
+    #    notify-send -u low "izulu" "$city"
+    #fi
+    echo $country
+}
+
+#check in which environment we run to select a command to set a wallpaper
+getWPCommand() {
+    #partly taken from xdg-open
+    if [ x"$DESKTOP_SESSION" = x"ubuntu"  ] || [ x"$DESKTOP_SESSION" = x"gnome" ] || [ x"$DESKTOP_SESSION" = x"ubuntu-2d" ];then
+        echo "gsettings set org.gnome.desktop.background picture-uri file://"
+    elif [ x"$GNOME_DESKTOP_SESSION_ID" != x"" ];then
+        echo "gconftool --type string -s /desktop/gnome/background/picture_filename"
+    elif xprop -root _DT_SAVE_MODE | grep ' = \"xfce4\"$' >/dev/null 2>&1; then
+        echo "xfdesktop --reload"
+    elif command -v Esetroot > /dev/null; then
+        echo "Esetroot -scale"
+    elif command -v feh > /dev/null; then
+        echo "feh --bg-scale"
+    elif command -v display > /dev/null; then
+        echo "display -window root"
+    else
+        echo "gconftool --type string -s /desktop/gnome/background/picture_filename"
+    fi
+}
+
+checkConfig() {
+    if [[ ! -d "$HOME/.izulu/" ]];then
+        mkdir "$HOME/.izulu/"
+    fi
+    if [[ ! -e "$HOME/.izulu/config" ]];then
+        echo "WPCOMMAND=\"\"   #command to set the wallpaper
+CITY=\"\"     
+WOEID=\"\"            #WOEID for Yahoo, the nightmode, if automatic fails
+WIND=\"\"
+SWISS_RADAR=\"\"
+RANDOMSUNDIR=\"\"   #Directories with pictures to randomly pick one
+RANDOMCLOUDDIR=\"\"
+RANDOMRAINDIR=\"\"
+RANDOMSNOWDIR=\"\"
+RANDOMMISCDIR=\"\"" > "$HOME/.izulu/config"
+    fi
+   
+}
+
+readConfig() {
+    source "$HOME"/.izulu/config
+}
+
+checkConfig
+readConfig
+
+#read arguments
+while [[ $# -gt 0 ]] ; do
+    parm="$1"
+    shift
+
+    case "$parm" in
+        -c | --city)
+            CITY="$1"
+            ;;
+        -d | --daemon)
+            MONITOR=TRUE
+            ;;
+        -i | --interval)
+            INTERVAL="$1"
+            ;;
+        -l | --log)
+            LOG=TRUE
+            ;;
+        -r | --random)
+            RANDOMLY=TRUE
+            ;;
+        -n | --night)
+            NIGHT=TRUE
+            ;;
+        -o | --osd)
+            OSD=TRUE
+            ;;
+        -p | --preview)
+           PREVIEW=TRUE
+           ;;
+        -t | --temperature)
+           TEMPERATURE=TRUE
+           ;;
+        -wid | --woeid)
+           WOEID="$1"
+           ;;
+        -w | --wind)
+           WIND=TRUE
+           ;;
+        -gr | --german-radar)
+            GERMAN_RADAR=TRUE
+            ;;
+        -sr | --swiss-radar)
+           SWISS_RADAR=TRUE
+           ;;
+        -rd | --radar)
+            RADAR=TRUE
+            RADAROPTIONS=()
+            for option in $*;do
+                if [ "${option:0:1}" == "-" ];then
+                    #this option dont belongs to the radarswitch anymore
+                    break
+                else
+                    RADAROPTIONS[${#RADAROPTIONS[*]}]="$option"
+                    shift
+                fi
+            done
+            ;;
+        --help)
+            echo "-c city, --city city:
+    Set the city with the relevant weather, e.g Berlin.
+-d, -daemon:
+    Enable daemon-mode, check the weather every 15 minutes.
+-gr, --german-radar
+    Shortcut: All german rader images.
+-i interval, --interval interval:
+    Specify a custom check-interval when in daemon-mode, e.g. 60 (seconds).
+-n, --night:
+    Set another wallpaper at night.
+-o, --osd:
+    Send a notification when weather changes.
+-p, --preview
+    Add images showing the weather forecast.
+-r, --random:
+    Choose the wallpaper randomly, only works when the directory is named in the config.
+-rd [warning|radar] [warning|radar] [germany|swiss], --radar [warning|radar] [warning|radar] [germany|swiss]:
+    Show a warning and/or a radarimage for a country. Wetteralarm (www.wetteralarm.ch) and Rain-Radar (meteoschweiz.admin.ch) for Switzerland, official warnings (http://www.dwd.de/) and a satellite-image (http://www.dlr.de/) for Germany.
+-sr, --swiss-radar
+    Shortcut: All swiss rader images.
+-t, --temperature
+    Show the temperature.
+-wid, --woeid
+    The WOEID of the location, see http://developer.yahoo.com/geo/geoplanet/guide/concepts.html"
+            exit 0
+            ;;
+
+        --version)
+            echo "izulu 0.3"
+            exit 0
+            ;;
+    esac
+done
+
+TEXTDOMAIN="izulu"
+TEXTDOMAINDIR="/usr/share/locale/"
+export TEXTDOMAIN
+export TEXTDOMAINDIR
+
+if [ "$WPCOMMAND" == "" ];then
+    WPCOMMAND="$(getWPCommand)"
+fi
+
+if [ "$CITY" == "" ] && [ "$WOEID" == "" ];then
+    CITY="$(getCity)"
+    if [ "$CITY" == "" ];then
+        echo "Error: Your location is not discoverable. Please specify a city with 'izulu -c cityname'." >&2
+        exit 1
+    fi
+fi
+
+#the woeid has to be set before asking yahoo, make this global to cache it
+setWOEID "$CITY"
+if [ "$WOEID" == "" ];then
+    echo "Error: Yahoo can't find a location with this name"
+    exit 2
+fi
+
+weather=$(getWeather "$WOEID")
+
+if [ "$LOG" == "TRUE" ];then
+    echo "$weather" >> "$HOME"/izululog
+fi
+
+chooseWallpaper "$weather"
+
+if [ "$MONITOR" == "TRUE" ];then
+    monitor
+fi
+

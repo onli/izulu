@@ -1,0 +1,62 @@
+msgid "partly_sunny"
+msgstr "Wetter: Manchmal sonnig"
+
+msgid "mostly_sunny"
+msgstr "Wetter: Überwiegend sonnig"
+
+msgid "clear"
+msgstr "Wetter: Sonnig"
+
+msgid "partly_cloudy"
+msgstr "Wetter: Leicht bewölkt"
+
+msgid "mostly_cloudy"
+msgstr "Wetter: Überwiegend bewölkt"
+
+msgid "cloudy"
+msgstr "Wetter: Bewölkt"
+
+msgid "overcast"
+msgstr "Wetter: Stark bewölkt"
+
+msgid "chance_of_rain"
+msgstr "Wetter: Regen möglich"
+
+msgid "drizzle"
+msgstr "Wetter: Nieselregen"
+
+msgid "light_rain"
+msgstr "Wetter: Etwas Regen"
+
+msgid "showers"
+msgstr "Wetter: Regenfälle"
+
+msgid "rain_showers"
+msgstr "Wetter: Regenfälle"
+
+msgid "rain"
+msgstr "Wetter: Regen"
+
+msgid "heavy_rain"
+msgstr "Wetter: Regenschauer"
+
+msgid "thunderstorm"
+msgstr "Wetter: Gewitter"
+
+msgid "sleet"
+msgstr "Wetter: Graupelregen"
+
+msgid "light_snow"
+msgstr "Wetter: Leichter Schneefall"
+
+msgid "snow"
+msgstr "Wetter: Schnee"
+
+msgid "snow_showers"
+msgstr "Wetter: Starker Schneefall"
+
+msgid "fog"
+msgstr "Wetter: Nebel"
+
+msgid "haze"
+msgstr "Wetter: Dunst"
