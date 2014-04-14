@@ -272,17 +272,15 @@ setImage() {
             local day=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/rss/channel/item/yweather:forecast[$i]" -v '@day')
             convert "$tmpicon" -gravity South -background '#0000' -fill grey -font Helvetica -pointsize 16 -splice 0x24  -annotate +0+2 "$day" "$tmpicon"
             
-            # at least +20 y height to be above typical taskbar
+            # at least +20 height to be above typical taskbar
             convert -depth 8 -gravity SouthEast -geometry +$((330-i*64))+20 "$tmpimage" "$tmpicon" -composite "$tmpimage"
-            # TODO: Center text
-            # convert -gravity SouthEast "$tmpimage" -font Helvetica -antialias -pointsize 16 -fill grey -draw "text $((335-i*64)),20 $day" "$tmpimage"
             
         done
     fi
 
     if [ "$TEMPERATURE" == "TRUE" ];then
         local temperature=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/rss/channel/item/yweather:condition" -v '@temp')
-        convert -gravity SouthWest "$tmpimage" -font Helvetica -pointsize 36 -fill grey -annotate 0x20+20+20 "$temperature °C" "$tmpimage"
+        convert -gravity SouthWest "$tmpimage" -font Helvetica -pointsize 36 -fill grey -annotate +20+20 "$temperature °C" "$tmpimage"
     fi
     
     addRadar "$tmpimage"
