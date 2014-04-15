@@ -596,9 +596,6 @@ getCity() {
 getCountry() {
     ipApiLookup=$(wget -O - -q "http://freegeoip.net/xml/")
     local country=$(echo "$ipApiLookup" | xml_grep --text_only '/Response/CountryCode')
-    #if command -v notify-send >/dev/null;then
-    #    notify-send -u low "izulu" "$city"
-    #fi
     echo $country
 }
 
@@ -606,6 +603,7 @@ getCountry() {
 getWPCommand() {
     #partly taken from xdg-open
     if [ x"$DESKTOP_SESSION" = x"ubuntu"  ] || [ x"$DESKTOP_SESSION" = x"gnome" ] || [ x"$DESKTOP_SESSION" = x"ubuntu-2d" ];then
+        gsettings set org.gnome.desktop.background picture-options "stretched"
         echo "gsettings set org.gnome.desktop.background picture-uri file://"
     elif [ x"$GNOME_DESKTOP_SESSION_ID" != x"" ];then
         echo "gconftool --type string -s /desktop/gnome/background/picture_filename"
