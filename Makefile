@@ -21,7 +21,7 @@ lang/%.mo: lang/%.po
 all: $(MANPAGES) $(LANGFILES)
 
 install: 
-	@install -d "$(DESTDIR)$(BINDIR)" "$(DESTDIR)$(APPDIR)" "$(DESTDIR)$(MANDIR)/man1" "$(DESTDIR)$(DOCDIR)/izulu"
+	@install -d "$(DESTDIR)$(BINDIR)" "$(DESTDIR)$(APPDIR)" "$(DESTDIR)$(MANDIR)/man1" "$(DESTDIR)$(DOCDIR)/izulu" "$(DESTDIR)$(LANGDIR_EN)" "$(DESTDIR)$(LANGDIR_DE)"
 	@install -m 0755 -v izulu "$(DESTDIR)$(BINDIR)/izulu"
 	@install -m 0644 -v gfx/forecast* "$(DESTDIR)$(APPDIR)/"
 	@install -m 0644 -v gfx/gen_* "$(DESTDIR)$(APPDIR)/"
