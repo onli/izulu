@@ -272,15 +272,14 @@ setImage() {
             local day=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/rss/channel/item/yweather:forecast[$i]" -v '@day')
             convert "$tmpicon" -gravity South -background '#0000' -fill grey -font Helvetica -pointsize 16 -splice 0x24  -annotate +0+2 "$day" "$tmpicon"
             
-            # at least +20 height to be above typical taskbar
-            convert -depth 8 -gravity SouthEast -geometry +$((330-i*64))+20 "$tmpimage" "$tmpicon" -composite "$tmpimage"
-            
+            # at least +20 y height to be above typical taskbar
+            convert -depth 8 -gravity SouthEast -geometry +$((330-i*64))+20 "$tmpimage" "$tmpicon" -composite "$tmpimage"          
         done
     fi
 
     if [ "$TEMPERATURE" == "TRUE" ];then
         local temperature=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/rss/channel/item/yweather:condition" -v '@temp')
-        convert -gravity SouthWest "$tmpimage" -font Helvetica -pointsize 36 -fill grey -annotate +20+20 "$temperature °C" "$tmpimage"
+        convert -gravity SouthWest "$tmpimage" -font Helvetica -pointsize 36 -fill grey -annotate +20+20 "$temperature°C" "$tmpimage"
     fi
     
     addRadar "$tmpimage"
@@ -596,17 +595,25 @@ getCity() {
 getCountry() {
     ipApiLookup=$(wget -O - -q "http://freegeoip.net/xml/")
     local country=$(echo "$ipApiLookup" | xml_grep --text_only '/Response/CountryCode')
+    #if command -v notify-send >/dev/null;then
+    #    notify-send -u low "izulu" "$city"
+    #fi
     echo $country
 }
 
 #check in which environment we run to select a command to set a wallpaper
 getWPCommand() {
     #partly taken from xdg-open
-    if [ x"$DESKTOP_SESSION" = x"ubuntu"  ] || [ x"$DESKTOP_SESSION" = x"gnome" ] || [ x"$DESKTOP_SESSION" = x"ubuntu-2d" ];then
-        gsettings set org.gnome.desktop.background picture-options "stretched"
+    if [ x"$DESKTOP_SESSION" = x"ubuntu"  ] || [ x"$DESKTOP_SESSION" = x"ubuntu-2d" ];then
+	gsettings set org.gnome.desktop.background picture-options "stretched"
         echo "gsettings set org.gnome.desktop.background picture-uri file://"
-    elif [ x"$GNOME_DESKTOP_SESSION_ID" != x"" ];then
-        echo "gconftool --type string -s /desktop/gnome/background/picture_filename"
+    elif [ x"$GNOME_DESKTOP_SESSION_ID" != x"" ] || [ x"$DESKTOP_SESSION" = x"gnome" ];then
+        if command -v gnome-about > /dev/null; then
+            echo "gconftool --type string -s /desktop/gnome/background/picture_filename"
+        else
+            gsettings set org.gnome.desktop.background picture-options "stretched"
+            echo "gsettings set org.gnome.desktop.background picture-uri file://"
+        fi
     elif xprop -root _DT_SAVE_MODE | grep ' = \"xfce4\"$' >/dev/null 2>&1; then
         echo "xfdesktop --reload"
     elif command -v Esetroot > /dev/null; then
@@ -733,7 +740,7 @@ while [[ $# -gt 0 ]] ; do
             ;;
 
         --version)
-            echo "izulu 0.3"
+            echo "izulu 0.4.1"
             exit 0
             ;;
     esac
