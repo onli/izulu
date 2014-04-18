@@ -1,0 +1,15 @@
+Source: izulu
+Section: misc
+Priority: extra
+Maintainer: onli <onli@paskuda.biz>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+Homepage: https://github.com/onli/izulu
+#Vcs-Git: git://git.debian.org/collab-maint/izulu.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/izulu.git;a=summary
+
+Package: izulu
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, imagemagick, xmlstarlet, xml-twig-tools
+Description: weather desktop script
+ <insert long description, indented with spaces>

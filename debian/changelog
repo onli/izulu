@@ -1,0 +1,5 @@
+izulu (0.4.1) trusty; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- onli <onli@paskuda.biz>  Thu, 17 Apr 2014 13:17:32 +0200
