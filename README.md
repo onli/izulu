@@ -1,13 +1,11 @@
 # izulu
+Weather aware desktop background images
 
-weather-aware desktop background images
-
-izulu is a Bash-script that fetches the current weather from Yahoo and changes the desktop background accordingly.
+Izulu is a script that fetches the current weather from Yahoo and changes the desktop background accordingly.
 
 It can also show the weather forecast and the current temperature. As much as possible is detected automatically, like the command to change the background or the current position.
 
 ## Install
-
 
 ### PPA
 
@@ -20,7 +18,6 @@ and install **izulu**
     sudo apt-get update
     sudo apt-get install izulu
 
-
 ### Provided .deb
 
 The included Debian-Package is a snapshot, made on new releases, so not necessarily bleeding edge. Install it with:
@@ -29,9 +26,7 @@ The included Debian-Package is a snapshot, made on new releases, so not necessar
     
 You still have to install the dependencies manually (see next section).
 
-
 ### Manual
-
 
 Download this repository and install with:
 
@@ -42,18 +37,18 @@ Install the dependencies (on Ubuntu):
 
     sudo apt-get install imagemagick xmlstarlet xml-twig-tools 
 
-
 On older Ubuntu systems, install also `notify-send`. It is not strictly necessary, only if `--osd` is specified to show notifications on weather change.
 
-## Configuration and Start
+## Start
 
-
-izulu can configured partly in **~/.izulu/config**, especially the `CITY` and `WOEID`-Parameter, if the automatic location detection fails.
-First, try to set `CITY` to the current location. If that fails, get the `WOEID` from http://woeid.rosselliot.co.nz/ and set it in the config.
-
-Then, start izulu:
+To use all common features, start izulu like this:
 
     izulu --daemon --night --preview --temperature --osd &
+    
+## Configuration
+
+izulu can configured partly in **~/.izulu/config**, especially the `CITY` and `WOEID` parameter are important if the automatic location detection fails.
+First, try to set `CITY` to the current location. If that fails, get the `WOEID` from http://woeid.rosselliot.co.nz/ and set it in the config.
 
 For a list of all parameters see the manpage.
 
