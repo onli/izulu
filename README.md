@@ -1,6 +1,8 @@
 # izulu
 Weather aware desktop background images
 
+![izulu example](https://lh5.googleusercontent.com/-E2Idz1l1NV0/U0rCEzev83I/AAAAAAAAC60/rK9ELFUp7Pg/s800/izulu.jpg)
+
 Izulu is a script that fetches the current weather from Yahoo and changes the desktop background accordingly.
 
 It can also show the weather forecast and the current temperature. As much as possible is detected automatically, like the command to change the background or the current position.
