@@ -17,7 +17,7 @@ http://www.flickr.com/photos/utrechtman/448743132/, Attribution-Noncommercial-No
 gen_snow_night:
 http://www.flickr.com/photos/7933170@N03/763876645/, Attribution-Noncommercial-No Derivative Works 2.0 Generic
 gen_sun:
-http://www.flickr.com/photos/ecstaticist/1048502108/, Attribution-Noncommercial-Share Alike 2.0 Generic
+https://secure.flickr.com/photos/nicholas_t/2082388610, Attribution 2.0 Generic
 gen_sun_night:
 http://www.flickr.com/photos/jahdakinebrah/314603021/, Attribution-Noncommercial 2.0 Generic
 gen_thunder:
