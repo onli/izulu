@@ -147,7 +147,7 @@ chooseWallpaper() {
             ;;
         # "Thunderstorm")
         "4" | "3" | "37" | "38" | "39" | "44" | "45" | "47") 
-            setWallpaper "thunderstorm" "gen_rain"
+            setWallpaper "thunderstorm" "gen_thunder"
             ;;
 
         # Snow:
