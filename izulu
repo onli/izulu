@@ -270,7 +270,7 @@ setImage() {
             local tmpicon=$(mktemp)
             cp "/usr/share/izulu/$icon" "$tmpicon"
             local day=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/rss/channel/item/yweather:forecast[$i]" -v '@day')
-            convert "$tmpicon" -gravity South -background '#0000' -fill grey -font Helvetica -pointsize 16 -splice 0x24  -annotate +0+2 "$day" "$tmpicon"
+            convert "$tmpicon" -gravity South -fill '#c0bfbd' -font Helvetica -background '#0000' -pointsize 16 -splice 0x24  -annotate +0+2 "$day" "$tmpicon"
             
             # at least +20 y height to be above typical taskbar
             convert -depth 8 -gravity SouthEast -geometry +$((330-i*64))+20 "$tmpimage" "$tmpicon" -composite "$tmpimage"          
@@ -279,7 +279,7 @@ setImage() {
 
     if [ "$TEMPERATURE" == "TRUE" ];then
         local temperature=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/rss/channel/item/yweather:condition" -v '@temp')
-        convert -gravity SouthWest "$tmpimage" -font Helvetica -pointsize 36 -fill grey -background '#0000' -annotate +10+20 "$temperature°C" "$tmpimage"
+        convert -gravity SouthWest "$tmpimage" -font Helvetica -pointsize 36 -fill '#c0bfbd' -background '#0000' -annotate +10+20 "$temperature°C" "$tmpimage"
     fi
     
     addRadar "$tmpimage"
@@ -740,7 +740,7 @@ while [[ $# -gt 0 ]] ; do
             ;;
 
         --version)
-            echo "izulu 0.4.1"
+            echo "izulu 0.4.3"
             exit 0
             ;;
     esac
