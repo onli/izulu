@@ -1,3 +1,8 @@
+0.5:
+    * Add --temperature-gravity, --temperature-margin and --compat parameters. This makes
+      it possible to use the temperature display with DEs like unity that would otherwise
+      cover the default position with a taskbar or similar.
+
 0.4:
     * Show all 5 days of weather forecast icons
     * Show the day of the forecast icon

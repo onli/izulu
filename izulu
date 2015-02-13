@@ -279,7 +279,7 @@ setImage() {
 
     if [ "$TEMPERATURE" == "TRUE" ];then
         local temperature=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/rss/channel/item/yweather:condition" -v '@temp')
-        convert -gravity SouthWest "$tmpimage" -font Helvetica -pointsize 36 -fill '#c0bfbd' -background '#0000' -annotate +10+20 "$temperature°C" "$tmpimage"
+        convert -gravity "$TEMPERATURE_GRAVITY" "$tmpimage" -font Helvetica -pointsize 36 -fill '#c0bfbd' -background '#0000' -annotate "$TEMPERATURE_MARGIN" "$temperature°C" "$tmpimage"
     fi
     
     addRadar "$tmpimage"
@@ -650,6 +650,10 @@ readConfig() {
     source "$HOME"/.izulu/config
 }
 
+# set default variables
+TEMPERATURE_GRAVITY="SouthWest"
+TEMPERATURE_MARGIN="+10+20"
+
 checkConfig
 readConfig
 
@@ -681,17 +685,29 @@ while [[ $# -gt 0 ]] ; do
             OSD=TRUE
             ;;
         -p | --preview)
-           PREVIEW=TRUE
-           ;;
+            PREVIEW=TRUE
+            ;;
         -t | --temperature)
-           TEMPERATURE=TRUE
-           ;;
+            TEMPERATURE=TRUE
+            ;;
         -wid | --woeid)
-           WOEID="$1"
-           ;;
+            WOEID="$1"
+            ;;
         -w | --wind)
-           WIND=TRUE
-           ;;
+            WIND=TRUE
+            ;;
+        -tg | --temperature-gravity)
+            TEMPERATURE_GRAVITY="$1"
+            ;;
+        -tm | --temperature-margin)
+            TEMPERATURE_MARGIN="$1"
+            ;;
+        -co | --compat)
+            if [[ "$1" -eq "unity" ]];then
+                TEMPERATURE_GRAVITY="NorthEast"
+                TEMPERATURE_MARGIN="+10+40"
+            fi
+            ;;
         -gr | --german-radar)
             GERMAN_RADAR=TRUE
             ;;
@@ -734,13 +750,19 @@ while [[ $# -gt 0 ]] ; do
     Shortcut: All swiss rader images.
 -t, --temperature
     Show the temperature.
+-tg gravity, --temperature-gravity gravity
+    Set the gravity anchor of the temperature display. Possible choices are NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast. See also http://www.imagemagick.org/script/command-line-options.php#gravity
+-tm margin, --temperature-margin margin
+    Set the margin the temperature display shall have from the screen borders. The format for margin is +x+y, for example '+10+30'.
+-co desktop, --compat desktop
+    Set several default parameters for compatibility with the defaults of a specific desktop environment. The sole possible value for desktop so far is 'unity', and it will move the temparature display to the upper right corner.
 -wid, --woeid
     The WOEID of the location, see http://developer.yahoo.com/geo/geoplanet/guide/concepts.html"
             exit 0
             ;;
 
         --version)
-            echo "izulu 0.4.3"
+            echo "izulu 0.5.0"
             exit 0
             ;;
     esac
