@@ -20,14 +20,6 @@ and install **izulu**
     sudo apt-get update
     sudo apt-get install izulu
 
-### Provided .deb
-
-The included Debian-Package is a snapshot, made on new releases, so not necessarily bleeding edge. Install it with:
-
-    sudo dpkg -i izulu_*.deb
-    
-You still have to install the dependencies manually (see next section).
-
 ### Manual
 
 Download this repository and install with:
