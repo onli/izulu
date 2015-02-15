@@ -1,0 +1,159 @@
+html {
+    background-color: #ADD8E6;
+    background-size: cover;
+    background-repeat: no-repeat;
+    min-width: 100%;
+    min-height: 100%;
+    font-family: ubuntu, sans-serif;
+    color: white;
+    text-shadow: black 0.1em 0.1em 0.2em;
+}
+
+a {
+    color: white;
+}
+
+html.night {
+    background-color: #5B747C;
+}
+
+html.sun {
+    background-image: url("gfx/sun.jpg");
+}
+
+html.sun.night  {
+    background-image: url("gfx/sun_night.jpg");
+}
+
+html.rain {
+    background-image: url("gfx/rain.jpg");
+}
+
+html.rain.night {
+    background-image: url("gfx/rain_night.jpg");
+}
+
+html.snow {
+    background-image: url("gfx/snow.jpg");
+}
+
+html.snow.night  {
+    background-image: url("gfx/snow_night.jpg");
+}
+
+body {
+    height:100%;
+    margin: 0;
+    display : flex;
+    flex-direction: row;
+    margin: auto;
+    max-width: 50em;
+}
+
+main {
+    max-width: 40em;
+    width: 100%;
+    background: rgba(0,0,0,0.6);
+    margin: 2em 0;
+    padding: 0.1em 1em 1em 1em;
+    border-radius: 4px 0 4px 4px;
+    line-height: 130%;
+}
+
+main h2 {
+    margin-top: 3em;
+}
+
+@font-face {
+    font-family: 'MeteoconsRegular';
+    src: url('gfx/meteocons-webfont.eot');
+    src: url('gfx/meteocons-webfont.eot?#iefix') format('embedded-opentype'),
+         url('gfx/meteocons-webfont.woff') format('woff'),
+         url('gfx/meteocons-webfont.ttf') format('truetype'),
+         url('gfx/meteocons-webfont.svg#MeteoconsRegular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+#banner {
+    font-family: "Satisfy";
+    margin-bottom: 1.5em;
+}
+
+#banner a {
+    color: white;
+    text-decoration: none;
+}
+
+ul {
+    list-style-type: none;
+}
+
+#buttons {
+    font-family: 'MeteoconsRegular';
+    margin-top: 0.2em;
+}
+
+button {
+    cursor: pointer;
+}
+
+
+#demo {
+    border-top: 1px dashed white;
+    padding-top: 1em;
+}
+
+#buttons {
+    display: inline;
+    margin-left: 1em;
+}
+
+#buttons button:before {
+	font-family: 'MeteoconsRegular';
+	content: attr(data-icon);
+}
+
+#download {
+    display: block;
+    width: 6em;
+    text-align: center;
+    border: 1px solid rgba(255,255,255, 0.4);
+    background-color: #5B747C;
+    color: white;
+    padding: 0.3em;
+    text-decoration: none;
+    margin: auto;
+    margin-top: 4em;
+    margin-bottom: 5em;
+}
+
+#params dt {
+    font-family: monospace;
+}
+
+#params dd {
+    margin-top: 0.5em;
+    margin-bottom: 1em;
+}
+
+nav {
+    background: rgba(0,0,0,0.6);
+    border-radius: 0 4px 4px 0;
+    padding-right: 1em;
+    margin: 2em 0;
+    height: 100%;
+}
+
+nav {
+    color: white;
+}
+
+nav li {
+    display: block;
+}
+
+#fotoCredits dd {
+    margin-top: 0.3em;
+    margin-bottom: 0.6em;
+}

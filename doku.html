@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html class="sun">
+    <head>
+        <title>Documentation - izulu</title>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <link rel="stylesheet" href="style.css" >
+        <meta name="viewport" content="width=device-width" >
+        <script src="main.js" defer></script>
+        <link href="http://fonts.googleapis.com/css?family=Satisfy" rel="stylesheet" type="text/css">
+    </head>
+    <body>
+        <a href="https://github.com/onli/izulu"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://camo.githubusercontent.com/c6286ade715e9bea433b4705870de482a654f78a/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f77686974655f6666666666662e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_left_white_ffffff.png"></a>
+        <main>
+            <h1 id="banner"><a href="index.html">izulu</a></h1>
+            <h2>Example</h2>
+            <p>
+            izulu tries to get as many information as possible automatically, like the current location. It can be started like this:
+
+            <pre><code>izulu -n -p -t</code></pre>
+
+            To show different images depending of timeand day (<code>-n</code>), to show the forecast (<code>-p</code>) and the temperate (<code>-t</code>).<br /><br />
+
+            To run it as a deamon add <code>-d</code>, and <code>-o</code> to get notifications:
+            
+            <pre><code>izulu -d -n -p -t -o</code></pre>
+
+            And if the location detection fails, the current city can be given with <code>-c</code>:
+
+            <pre><code>izulu -c troyes -d -n -p -t -o</code></pre>
+            
+            </p>
+
+            <h2>Parameter</h2>
+            <dl id="params">
+                <dt>-c city, --city city</dt>
+                <dd>Set the city with the relevant weather, e.g Berlin.</dd>
+
+                <dt>-d, -daemon</dt>
+                <dd>Enable daemon-mode, check the weather every 15 minutes.</dd>
+
+                <dt>-gr, --german-radar</dt>
+                <dd>Shortcut: All german rader images.</dd>
+
+                <dt>-i interval, --interval interval</dt>
+                <dd>Specify a custom check-interval when in daemon-mode, e.g. 60 (seconds).</dd>
+
+                <dt>-n, --night</dt>
+                <dd>Set another wallpaper at night.</dd>
+
+                <dt>-o, --osd</dt>
+                <dd>Send a notification when weather changes.</dd>
+
+                <dt>-p, --preview</dt>
+                <dd>Add images showing the weather forecast.</dd>
+
+                <dt>-r, --random</dt>
+                <dd>Choose the wallpaper randomly, only works when the directory is named in the config.</dd>
+
+                <dt>-rd [warning|radar] [warning|radar] [germany|swiss], --radar [warning|radar] [warning|radar] [germany|swiss]</dt>
+                <dd>Show a warning and/or a radarimage for a country. Wetteralarm (www.wetteralarm.ch) and Rain-Radar (meteoschweiz.admin.ch) for Switzerland, official warnings (http://www.dwd.de/) and a satellite-image (http://www.dlr.de/) for Germany.</dd>
+
+                <dt>-sr, --swiss-radar</dt>
+                <dd>Shortcut: All swiss rader images.</dd>
+
+                <dt>-t, --temperature</dt>
+                <dd>Show the temperature.</dd>
+
+                <dt>-tg gravity, --temperature-gravity gravity</dt>
+                <dd>Set the gravity anchor of the temperature display. Possible choices are NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast. See also http://www.imagemagick.org/script/command-line-options.php#gravity</dd>
+
+                <dt>-tm margin, --temperature-margin margin</dt>
+                <dd>Set the margin the temperature display shall have from the screen borders. The format for margin is +x+y, for example '+10+30'.</dd>
+
+                <dt>-co desktop, --compat desktop</dt>
+                <dd>Set several default parameters for compatibility with the defaults of a specific desktop environment. The sole possible value for desktop so far is 'unity', and it will move the temparature display to the upper right corner.</dd>
+
+                <dt>-wid, --woeid</dt>
+                <dd>The WOEID of the location, see http://developer.yahoo.com/geo/geoplanet/guide/concepts.html</dd>
+            </dl>
+        </main>
+        <nav>
+            <ul>
+                <li>
+                    <a href="index.html">Start</a>
+                </li>
+                <li>
+                    Dokumention
+                </li>
+                <li>
+                    <a href="credits.html">Credits</a>
+                </li>
+            </ul>
+        </nav>
+    </body>
+</html>
