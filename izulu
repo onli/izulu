@@ -219,7 +219,7 @@ setWallpaper() {
         fi
     fi
     current="$specific"
-
+    
     if [ "$RANDOMLY" == "TRUE" ] && [[ -z "$random_override" ]];then
         random_image=$(cycleWallpaper "$specific" "$generic")
         if [[ -n "$random_image" ]];then
@@ -410,31 +410,33 @@ osdNotify() {
 cycleWallpaper() {
     local specific="$1"
     local generic="$2"
+    local randomdir=""
 
     case "$generic" in
         "gen_sun")      
-            RANDOMDIR="$RANDOMSUNDIR"
+            randomdir="$RANDOMSUNDIR"
             ;;
         "gen_cloud")
-            RANDOMDIR="$RANDOMCLOUDDIR"
+            randomdir="$RANDOMCLOUDDIR"
             ;;
         "gen_rain")
-            RANDOMDIR="$RANDOMRAINDIR"
+            randomdir="$RANDOMRAINDIR"
             ;;
         "gen_snow")
-            RANDOMDIR="$RANDOMSNOWDIR"
+            randomdir="$RANDOMSNOWDIR"
             ;;
-        "gen_misc")
-            RANDOMDIR="$RANDOMMISCDIR"
+        *)
+            randomdir="$RANDOMMISCDIR"
             ;;
     esac        
 
-    if [[ -z "$RANDOMDIR" ]];then
+    if [[ -z "$randomdir" ]];then
         setWallpaper "$specific" "$generic" "TRUE"
         return 1
-    fi    
+    fi
+
     local pictures=()
-    for picture in "$RANDOMDIR"/*;do
+    for picture in "$randomdir"/*;do
         pictures+=("$picture")
     done
     local chosen=$RANDOM
