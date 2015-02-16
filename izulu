@@ -435,12 +435,14 @@ cycleWallpaper() {
         return 1
     fi
 
-    local pictures=()
-    for picture in "$randomdir"/*;do
-        pictures+=("$picture")
-    done
-    local chosen=$RANDOM
-    let "chosen %= ${#pictures[*]}"
+    
+    # The IFS set to \n enables files with spaces
+    OLD_IFS=$IFS
+    IFS=$'\n'
+    # this gets all image files in randomdir and subdirs. The ${} around $randomdir is necessary to evaluate variables like ~
+    pictures=($(echo -e "$(find ${randomdir} -name '*' -exec file {} \; | grep -o -P '^.+: \w+ image' | sed s"#.*\($randomdir.*\):.*#\1#"g | sort)"))
+    IFS=$OLD_IFS
+    chosen=$(shuf -i1-${#pictures[@]} -n1)
     echo "${pictures[$chosen]}"
 }
 
