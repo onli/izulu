@@ -225,6 +225,7 @@ setWallpaper() {
         if [[ -n "$random_image" ]];then
             setImage "$random_image" &
         fi
+        osdNotify "$specific"
         return
     fi
 
@@ -249,10 +250,8 @@ setWallpaper() {
             fi
         fi
     fi
-    
-    if [ "$OSD" == "TRUE" ];then
-        osdNotify "$specific"
-    fi
+
+    osdNotify "$specific"
 }
 
 # set the Wallpaper
@@ -393,15 +392,17 @@ contains() {
 #send onscreen-notfication if weather changed
 #$1: message, new weather-state
 osdNotify() {
-    if [[ -z "$last_state" ]] || [ "$last_state" != "$1" ];then
-        if command -v notify-send > /dev/null;then
-           notify-send "izulu" "$(gettext "$1")"
-        else
-            echo "notify-send not installed, but osd via -o requested." \
-                 "Install libnotify-bin to use the osd."
+    if [ "$OSD" == "TRUE" ];then
+        if [[ -z "$last_state" ]] || [ "$last_state" != "$1" ];then
+            if command -v notify-send > /dev/null;then
+               notify-send "izulu" "$(gettext "$1")"
+            else
+                echo "notify-send not installed, but osd via -o requested." \
+                     "Install libnotify-bin to use the osd."
+            fi
         fi
+        last_state="$1"
     fi
-    last_state="$1"
 }
 
 #choose randomly a wallpaper
@@ -431,8 +432,13 @@ cycleWallpaper() {
     esac        
 
     if [[ -z "$randomdir" ]];then
-        setWallpaper "$specific" "$generic" "TRUE"
-        return 1
+        flickrimg=$(getFlickrImage "$generic")
+        if [[ -z "$flickrimg" ]];then
+            setWallpaper "$specific" "$generic" "TRUE"
+            return 1
+        else
+            echo "$flickrimg"
+        fi
     fi
 
     
@@ -444,6 +450,51 @@ cycleWallpaper() {
     IFS=$OLD_IFS
     chosen=$(shuf -i1-${#pictures[@]} -n1)
     echo "${pictures[$chosen]}"
+}
+
+getFlickrImage() {
+    local generic="$1"
+    # flickriver sorts the flickr groups images randomly for us
+    local riverurl=""
+    case "$generic" in
+        "gen_sun")      
+            riverurl="http://www.flickriver.com/groups/982364@N21/pool/random/"
+            ;;
+        "gen_cloud")
+            riverurl="http://www.flickriver.com/groups/clouds-mildness/pool/random/"
+            ;;
+        "gen_rain")
+            riverurl="http://www.flickriver.com/groups/387174@N22/pool/random/"
+            ;;
+        "gen_snow")
+            riverurl="http://www.flickriver.com/groups/snow_pictures/pool/random/"
+            ;;
+        "gen_wind")
+            riverurl="http://www.flickriver.com/groups/1159117@N24/pool/random/"
+            ;;
+        *)
+            # misc, mainly fog
+            riverurl="http://www.flickriver.com/groups/1040464@N23/pool/random/"
+            ;;
+    esac
+    local flickrpage=$(wget -O - --quiet $(wget -O - "$riverurl" --quiet | grep "class=\"noborder\"  target=\"_blank\".*http://www.flickr.com/photos" | sed 's#.*href=\"\([^\"]*\)\".*#\1#g' | uniq | shuf -n 1))
+    local imagesizes=$(echo -e "$flickrpage" | grep Y.photo.init | sed 's#.*Y.photo.init(\(.*\));#\1#g' | tr "}" "\n")
+    for size in "Large 2048" "Original" "Large 1600" "Large\"";do
+        # not all flickr images provide every size, so we try to get the best one
+        # It is nicer to prefer a size with a specific width, that is why Original is not first
+        local imageurl=$(echo -e "$imagesizes" | grep "$size" | sed -e 's#.*\(http[^"]*\).*"#\1#g' -e 's#\\##g')
+        if [[ -n  "$imageurl" ]];then
+            break
+        fi
+    done
+    if [[ -z "$imageurl" ]];then
+        return 1
+    fi
+    if [[ -z "$FLICKRTMP" ]];then
+        FLICKRTMP=$(mktemp)
+    fi
+    wget -O "$FLICKRTMP" "$imageurl" --quiet
+    echo "$FLICKRTMP"
 }
 
 
@@ -747,7 +798,7 @@ while [[ $# -gt 0 ]] ; do
 -p, --preview
     Add images showing the weather forecast.
 -r, --random:
-    Choose the wallpaper randomly, only works when the directory is named in the config.
+    Choose the wallpaper randomly. If no directory is named in the config, it will try to get a fitting image from flickr.
 -rd [warning|radar] [warning|radar] [germany|swiss], --radar [warning|radar] [warning|radar] [germany|swiss]:
     Show a warning and/or a radarimage for a country. Wetteralarm (www.wetteralarm.ch) and Rain-Radar (meteoschweiz.admin.ch) for Switzerland, official warnings (http://www.dwd.de/) and a satellite-image (http://www.dlr.de/) for Germany.
 -sr, --swiss-radar
@@ -766,7 +817,7 @@ while [[ $# -gt 0 ]] ; do
             ;;
 
         --version)
-            echo "izulu 0.5.0"
+            echo "izulu 0.6.0"
             exit 0
             ;;
     esac
