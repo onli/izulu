@@ -478,11 +478,11 @@ getFlickrImage() {
             ;;
     esac
     local flickrpage=$(wget -O - --quiet $(wget -O - "$riverurl" --quiet | grep "class=\"noborder\"  target=\"_blank\".*http://www.flickr.com/photos" | sed 's#.*href=\"\([^\"]*\)\".*#\1#g' | uniq | shuf -n 1))
-    local imagesizes=$(echo -e "$flickrpage" | grep Y.photo.init | sed 's#.*Y.photo.init(\(.*\));#\1#g' | tr "}" "\n")
-    for size in "Large 2048" "Original" "Large 1600" "Large\"";do
+    local imagesizes=$(echo -e "$flickrpage" | grep modelExport: | tr "}" "\n")
+    for size in "k" "o" "h" "l";do
         # not all flickr images provide every size, so we try to get the best one
         # It is nicer to prefer a size with a specific width, that is why Original is not first
-        local imageurl=$(echo -e "$imagesizes" | grep "$size" | sed -e 's#.*\(http[^"]*\).*"#\1#g' -e 's#\\##g')
+        local imageurl=$(echo -e "$imagesizes" | grep "\"$size\"" | sed -e 's#.*\(c4.staticflickr.com.*\).*"#https://\1#g' -e 's#\\##g')
         if [[ -n  "$imageurl" ]];then
             break
         fi
@@ -493,8 +493,11 @@ getFlickrImage() {
     if [[ -z "$FLICKRTMP" ]];then
         FLICKRTMP=$(mktemp)
     fi
-    wget -O "$FLICKRTMP" "$imageurl" --quiet
-    echo "$FLICKRTMP"
+    if wget -O "$FLICKRTMP" "$imageurl" --quiet;then
+        echo "$FLICKRTMP"
+    else
+        return 1
+    fi
 }
 
 
@@ -817,7 +820,7 @@ while [[ $# -gt 0 ]] ; do
             ;;
 
         --version)
-            echo "izulu 0.6.0"
+            echo "izulu 0.6.1"
             exit 0
             ;;
     esac
