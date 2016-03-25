@@ -24,7 +24,7 @@ getWeather() {
     local woeid="$1"
     
     local api_output=$(getYahooXML "$woeid")
-    echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m '/rss/channel/item/yweather:condition' -v '@code'
+    echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m '/query/results/channel/item/yweather:condition' -v '@code'
 }
 
 # get WOEID uesed for as location by Yahoo
@@ -44,8 +44,7 @@ getYahooWOEID() {
 # return: full xml-response
 getYahooXML() {
     local woeid="$1"
-    
-    local yahooWeather=$(wget -O - -q "http://weather.yahooapis.com/forecastrss?w=$woeid&u=c")
+    local yahooWeather=$(wget -O - -q "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20=%20${woeid}&format=xml")
     echo "$yahooWeather"
 }
 
@@ -55,7 +54,7 @@ getYahooXML() {
 getSunrise() {
     local api_output="$1"
     
-    echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m '/rss/channel/yweather:astronomy' -v '@sunrise'
+    echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m '/query/results/channel/yweather:astronomy' -v '@sunrise'
 }
 
 # get date of sunset from yahoo
@@ -64,7 +63,7 @@ getSunrise() {
 getSunset() {
     local api_output="$1"
 
-    echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m '/rss/channel/yweather:astronomy' -v '@sunset'
+    echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m '/query/results/channel/yweather:astronomy' -v '@sunset'
 }
 
 # map forecast-code to one of the icons
@@ -264,11 +263,11 @@ setImage() {
     if [ "$PREVIEW" == "TRUE" ];then
         for i in {1..5};do
             # merge preview-icons with background-image
-            local forecast=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/rss/channel/item/yweather:forecast[$i]" -v '@code')
+            local forecast=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/query/results/channel/item/yweather:forecast[$i]" -v '@code')
             local icon=$(chooseForecastIcon "$forecast")
             local tmpicon=$(mktemp)
             cp "/usr/share/izulu/$icon" "$tmpicon"
-            local day=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/rss/channel/item/yweather:forecast[$i]" -v '@day')
+            local day=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/query/results/channel/item/yweather:forecast[$i]" -v '@day')
             convert "$tmpicon" -gravity South -fill '#c0bfbd' -font Helvetica -background '#0000' -pointsize 16 -splice 0x24  -annotate +0+2 "$day" "$tmpicon"
             
             # at least +20 y height to be above typical taskbar
@@ -277,7 +276,10 @@ setImage() {
     fi
 
     if [ "$TEMPERATURE" == "TRUE" ];then
-        local temperature=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/rss/channel/item/yweather:condition" -v '@temp')
+        local temperature=$(echo "$api_output" | xmlstarlet sel -N yweather="http://xml.weather.yahoo.com/ns/rss/1.0" -t -m "/query/results/channel/item/yweather:condition" -v '@temp')
+        # yql is only giving us fahrenheit values, so we have to convert it into a sane unit
+        temperature=$(echo "($temperature - 32) * 0.5556" | bc -l)
+        temperature=${temperature/.*/}
         convert -gravity "$TEMPERATURE_GRAVITY" "$tmpimage" -font Helvetica -pointsize 36 -fill '#c0bfbd' -background '#0000' -annotate "$TEMPERATURE_MARGIN" "$temperature°C" "$tmpimage"
     fi
     
@@ -506,16 +508,16 @@ getFlickrImage() {
 getCurrentTime() {
     local api_output="$1"
     
-    local build_date=$(echo "$api_output" | xmlstarlet sel -t -m /rss/channel/lastBuildDate -v '.')
+    local build_date=$(echo "$api_output" | xmlstarlet sel -t -m /query/results/channel/lastBuildDate -v '.')
     local build_time=$(echo $build_date | sed 's/.*\(..:.....\).*/\1/')
     
-#12:20 pm hast to be caught and converted to 00:20 pm
-    if [ "$(echo ${build_time:6})" = "pm" ] && [ "$(echo ${build_time:0:2})" = "12" ];then
+#12:20 pm has to be caught and converted to 00:20 pm
+    if [ "$(echo ${build_time:6})" = "PM" -o "$(echo ${build_time:6})" = "pm" ] && [ "$(echo ${build_time:0:2})" = "12" ];then
         build_time="${build_time/12/00}"
     fi
    
-#12:20 am hast to be caught and converted to 00:20 am
-    if [ "$(echo ${build_time:6})" = "am" ] && [ "$(echo ${build_time:0:2})" = "12" ];then
+#12:20 am has to be caught and converted to 00:20 am
+    if [ "$(echo ${build_time:6})" = "AM" -o "$(echo ${build_time:6})" = "am" ]  && [ "$(echo ${build_time:0:2})" = "12" ];then
         build_time="${build_time/12/00}"
     fi
     
@@ -542,12 +544,15 @@ isDay() {
     if [[ -z "$cur_time" ]];then
         cur_time="$build_time"
     fi
+    echo $cur_time
 
     local sunrise=$(getSunrise "$api_output")
     local sunset=$(getSunset "$api_output")
    
     sunrise=$(makeComparable "$sunrise")
+    echo $sunrise
     sunset=$(makeComparable "$sunset")
+    echo $sunset
 
     #Sounds strange, but some cities don't build the rss-feed over
     #night, the last time a few minutes before sunset. First Workaround:
@@ -581,27 +586,35 @@ isDay() {
 #return: comparable time in minutes
 makeComparable() {
     local time="$1"
+    local ispm=1
 
-    if [[ -n "$(echo $time | grep am)" ]];then
+    if [[ -n "$(echo $time | grep 'am\|AM')" ]];then
         #it's am
         #remove all non-digits:
-        time=${time//[a-z: ]/}
-    else
-        #it's pm, must add 1200
-        time=${time//[a-z: ]/}
-        time=$((10#$time + 1200))
+        ispm=0
     fi
+    time=${time//[a-z:A-Z: ]/}
+    
     local length=${#time}
     if [[ "$length" -eq 3 ]];then
         #1:30
         local hours=${time:0:1}
         local minutes=${time:1:2}
     else
-        #11:30
-        local hours=${time:0:2}
-        local minutes=${time:2:2}
+        if [[ "$length" -eq 2 ]];then
+            #7:6 - yql irregularity
+             local hours=${time:0:1}
+             local minutes=${time:1:1}
+        else
+            #11:30
+            local hours=${time:0:2}
+            local minutes=${time:2:2}
+        fi
     fi
     time=$((10#$hours * 60 + 10#$minutes))
+    if [[ "$ispm" -eq 1 ]];then
+        time=$((10#$time + 1200))
+    fi
     echo $time
 }
 
@@ -820,7 +833,7 @@ while [[ $# -gt 0 ]] ; do
             ;;
 
         --version)
-            echo "izulu 0.6.1"
+            echo "izulu 0.6.2"
             exit 0
             ;;
     esac
