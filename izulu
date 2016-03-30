@@ -76,7 +76,7 @@ chooseForecastIcon() {
         "27" | "28" | "29" | "30" | "33" | "34" | "44")
             echo "forecast_sunnycloud"
             ;;
-        "6" | "8" | "9" | "10" | "11" | "12" | "17" | "18" | "35" | "40")
+        "6" | "8" | "9" | "10" | "11" | "12" | "17" | "18" | "35" | "40" | "39")
             echo "forecast_rain"
             ;;
         "31" | "32" | "36")
@@ -85,7 +85,7 @@ chooseForecastIcon() {
         "5" | "7" | "13" | "14" | "15" | "16" | "41" | "42" | "43" | "46")
             echo "forecast_snow"
             ;;
-        "0" | "1" | "2" | "3" | "4" | "37" | "38" | "39" | "45" | "47")
+        "0" | "1" | "2" | "3" | "4" | "37" | "38" | "45" | "47")
             echo "forecast_thunderstorm"
             ;;
     esac
@@ -121,7 +121,7 @@ chooseWallpaper() {
             ;;
 
         # Rain:
-        "40")
+        "40" | "39")
             setWallpaper "chance_of_rain" "gen_rain"
             ;;
 
@@ -145,7 +145,7 @@ chooseWallpaper() {
             setWallpaper "hail" "gen_rain"
             ;;
         # "Thunderstorm")
-        "4" | "3" | "37" | "38" | "39" | "44" | "45" | "47") 
+        "4" | "3" | "37" | "38" | "44" | "45" | "47") 
             setWallpaper "thunderstorm" "gen_thunder"
             ;;
 
@@ -544,15 +544,12 @@ isDay() {
     if [[ -z "$cur_time" ]];then
         cur_time="$build_time"
     fi
-    echo $cur_time
 
     local sunrise=$(getSunrise "$api_output")
     local sunset=$(getSunset "$api_output")
    
     sunrise=$(makeComparable "$sunrise")
-    echo $sunrise
     sunset=$(makeComparable "$sunset")
-    echo $sunset
 
     #Sounds strange, but some cities don't build the rss-feed over
     #night, the last time a few minutes before sunset. First Workaround:
@@ -833,7 +830,7 @@ while [[ $# -gt 0 ]] ; do
             ;;
 
         --version)
-            echo "izulu 0.6.2"
+            echo "izulu 0.6.3"
             exit 0
             ;;
     esac
