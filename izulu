@@ -440,18 +440,23 @@ cycleWallpaper() {
             return 1
         else
             echo "$flickrimg"
+            return 0
         fi
     fi
 
-    
-    # The IFS set to \n enables files with spaces
-    OLD_IFS=$IFS
-    IFS=$'\n'
-    # this gets all image files in randomdir and subdirs. The ${} around $randomdir is necessary to evaluate variables like ~
-    pictures=($(echo -e "$(find ${randomdir} -name '*' -exec file {} \; | grep -o -P '^.+: \w+ image' | sed s"#.*\($randomdir.*\):.*#\1#"g | sort)"))
-    IFS=$OLD_IFS
-    chosen=$(shuf -i1-${#pictures[@]} -n1)
-    echo "${pictures[$chosen]}"
+    if [[ -z "$ramdomdir" ]];then
+        setWallpaper "$specific" "$generic" "TRUE"
+        return 1
+    else
+        # The IFS set to \n enables files with spaces
+        OLD_IFS=$IFS
+        IFS=$'\n'
+        # this gets all image files in randomdir and subdirs. The ${} around $randomdir is necessary to evaluate variables like ~
+        pictures=($(echo -e "$(find ${randomdir} -name '*' -exec file {} \; | grep -o -P '^.+: \w+ image' | sed s"#.*\($randomdir.*\):.*#\1#"g | sort)"))
+        IFS=$OLD_IFS
+        chosen=$(shuf -i1-${#pictures[@]} -n1)
+        echo "${pictures[$chosen]}"
+    fi
 }
 
 getFlickrImage() {
@@ -476,7 +481,7 @@ getFlickrImage() {
             ;;
         *)
             # misc, mainly fog
-            riverurl="http://www.flickriver.com/groups/1040464@N23/pool/random/"
+            riverurl="http://www.flickriver.com/groups/fabulousfog/pool/random/"
             ;;
     esac
     local flickrpage=$(wget -O - --quiet $(wget -O - "$riverurl" --quiet | grep "class=\"noborder\"  target=\"_blank\".*http://www.flickr.com/photos" | sed 's#.*href=\"\([^\"]*\)\".*#\1#g' | uniq | shuf -n 1))
@@ -830,7 +835,7 @@ while [[ $# -gt 0 ]] ; do
             ;;
 
         --version)
-            echo "izulu 0.6.3"
+            echo "izulu 0.6.4"
             exit 0
             ;;
     esac
