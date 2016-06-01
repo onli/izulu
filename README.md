@@ -37,7 +37,7 @@ On older Ubuntu systems, install also `notify-send`. It is not strictly necessar
 
     wget https://raw.githubusercontent.com/onli/izulu/master/PKGBUILD #download "PKGBUILD" file
     makepkg
-    sudo pacman -U izulu-git-0.6.4.298a22d-1-any.pkg.tar.xz
+    sudo pacman -U izulu-git-*.pkg.tar.xz
 
 ## Start
 
