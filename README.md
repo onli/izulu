@@ -35,9 +35,9 @@ On older Ubuntu systems, install also `notify-send`. It is not strictly necessar
 
 ### Arch Linux
 
-    download "PKGBUILD" file
+    wget https://raw.githubusercontent.com/onli/izulu/master/PKGBUILD #download "PKGBUILD" file
     makepkg
-    sudo pacman -U izulu-git-0.5.15bcf93-1-any.pkg.tar.xz
+    sudo pacman -U izulu-git-0.6.4.298a22d-1-any.pkg.tar.xz
 
 ## Start
 
