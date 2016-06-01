@@ -19,6 +19,14 @@ and install **izulu**
     
     sudo apt-get update
     sudo apt-get install izulu
+    
+### Arch Linux
+
+Use pacman and the provided PKGBUILD to install:
+
+    wget https://raw.githubusercontent.com/onli/izulu/master/PKGBUILD #download "PKGBUILD" file
+    makepkg
+    sudo pacman -U izulu-git-*.pkg.tar.xz
 
 ### Manual
 
@@ -32,12 +40,6 @@ Install the dependencies (on Ubuntu):
     sudo apt-get install imagemagick xmlstarlet xml-twig-tools 
 
 On older Ubuntu systems, install also `notify-send`. It is not strictly necessary, only if `--osd` is specified to show notifications on weather change.
-
-### Arch Linux
-
-    wget https://raw.githubusercontent.com/onli/izulu/master/PKGBUILD #download "PKGBUILD" file
-    makepkg
-    sudo pacman -U izulu-git-*.pkg.tar.xz
 
 ## Start
 
