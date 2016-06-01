@@ -33,6 +33,12 @@ Install the dependencies (on Ubuntu):
 
 On older Ubuntu systems, install also `notify-send`. It is not strictly necessary, only if `--osd` is specified to show notifications on weather change.
 
+### Arch Linux
+
+    download "PKGBUILD" file
+    makepkg
+    sudo pacman -U izulu-git-0.5.15bcf93-1-any.pkg.tar.xz
+
 ## Start
 
 To use all common features, start izulu like this:
