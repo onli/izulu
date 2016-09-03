@@ -28,6 +28,17 @@ Use pacman and the provided PKGBUILD to install:
     makepkg
     sudo pacman -U izulu-git-*.pkg.tar.xz
 
+### Gentoo/Funtoo
+
+Use the [overlay](https://github.com/onli/overlay ) with layman
+
+    layman -o https://raw.github.com/onli/overlay/master/repositories.xml -f -a onli
+    
+and install with emerge
+
+    emerge izulu
+
+
 ### Manual
 
 Download this repository and install with:
@@ -37,7 +48,7 @@ Download this repository and install with:
 
 Install the dependencies (on Ubuntu):
 
-    sudo apt-get install imagemagick xmlstarlet xml-twig-tools 
+    sudo apt-get install imagemagick xmlstarlet jq bc
 
 On older Ubuntu systems, install also `notify-send`. It is not strictly necessary, only if `--osd` is specified to show notifications on weather change.
 
@@ -46,14 +57,22 @@ On older Ubuntu systems, install also `notify-send`. It is not strictly necessar
 To use all common features, start izulu like this:
 
     izulu --daemon --night --preview --temperature --osd &
+
+Optionally, use `-c city` or `-l LAT:LON` to set your current location manually. 
     
 ## Configuration
 
-izulu can configured partly in **~/.izulu/config**, especially the `CITY` and `WOEID` parameter are important if the automatic location detection fails.
-First, try to set `CITY` to the current location. If that fails, get the `WOEID` from http://woeid.rosselliot.co.nz/ and set it in the config.
-
 For a list of all parameters see the manpage.
 
-To overwrite images locally, check their name in **/usr/share/izulu** and add a image with the same name to **~/.izulu/**. It is also possible to further distinct between weather states
-(like rain/light_rain) instead of using the general category image by placing the more specific image into **~/.izulu/** as well. It should be best to directly look into the script (in `chooseWallpaper()`) to see the available categories.
+### Location
 
+izulu can configured partly in **~/.izulu/config**, especially the `CITY` or `LATITUDE` and `LONGITUDE` parameter are important if the automatic location detection fails.
+First, try to set `CITY` to the current location. If that fails, set `LATITUDE` and `LONGITUDE`.
+
+### Custom images
+
+To set custom images, check their name in **/usr/share/izulu** and add a image with the same name to **~/.izulu/**. The categories are *sun*, *cloud*, *rain*, *snow* , *wind* and *misc* (=fog), and there is a *thunder* category (according to its documentation not yet supported by the weather api, but planned). The image files are called *gen_CATEGORY*, for example *gen_sun*. Substates are *partly_cloudy* and *cloudy* for *gen_cloud*, *rain* and *hail* for *gen_rain*, *sleet* and *snow* for *gen_snow*. The category *gen_wind* also knows the substates *windy* and *tornado*, I hope you never see the latter. You can set custom images for the substates by saving an image with its name in **~/.izulu/**.
+
+### Random images
+
+With `-r|--random` izulu picks a random image from the corresponding directory set in **~/.izulu/config**. If no directory is set, izulu will try to get a random image from a fitting flickr group. This is currently a bit flaky, but izulu tries to fall back to its provided images if the flickr way fails.

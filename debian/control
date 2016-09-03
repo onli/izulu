@@ -10,6 +10,6 @@ Homepage: https://github.com/onli/izulu
 
 Package: izulu
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, imagemagick, xmlstarlet, xml-twig-tools
+Depends: ${shlibs:Depends}, ${misc:Depends}, imagemagick, xml-twig-tools, jq, bc
 Description: weather desktop script
  <insert long description, indented with spaces>
