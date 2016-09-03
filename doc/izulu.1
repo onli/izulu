@@ -9,17 +9,20 @@ This manual page documents briefly the
 .B izulu
 command.
 .PP 
-\fBizulu\fP is a tool to change the wallpaper according to the weather. Therefore it reads the Weather API of Yahoo.
+\fBizulu\fP is a tool to change the wallpaper according to the weather. Therefore it reads the Dark Sky Forecast API.
 .SH "OPTIONS"
 .TP 
 .B \-c "city"
 Set the city with the relevant weather, e.g Berlin.
 .TP 
+.B \-l "lat:lon"
+Set the current position as latitude and longitude coordinates.
+.TP 
 .BI \-d
 Enable daemon\-mode, check the weather every 60 minutes.
 .TP 
 .B \-i "interval"
-Specify a custom check\-interval when in daemon\-mode, e.g. 900 (seconds).
+Specify a custom check\-interval when in daemon\-mode, e.g. 900 (seconds, also the minimum).
 .TP 
 .BI \-n
 Activate night\-mode, different images will be used at night.
@@ -28,13 +31,10 @@ Activate night\-mode, different images will be used at night.
 Show the forecast in small preview\-icons.
 .TP 
 .BI \-r
-Choose the wallpaper randomly, only works when the directory is named in the config.
+Choose the wallpaper randomly. Uses the directories named in the config, if none is set it falls back to Flickr.
 .TP 
 .BI \-t 
 Show the temperature
-.TP 
-.BI \-w
-Enter the WOEID, only necessary if automatic detection fails. The WOEID is used by Yahoo to recognize the location.
 .TP 
 .TP 
 The command to change the wallpaper, the directories for the random\-mode, the WOEID and the city to check the weather by default may be changed in the config.
@@ -42,13 +42,17 @@ The command to change the wallpaper, the directories for the random\-mode, the W
 It uses a directory .izulu in home directory and /usr/share/izulu. To override the used images, save them in .izulu in the homedirectory with the name gen_sun, gen_cloud, gen_rain, gen_snow or gen_misc, which are also the images used if no specific image exists.
 To use further distinct images, save them as:
 
-sun: partly_sunny, mostly_sunny, clear
+sun: clear
 
-clouds: partly_cloudy, mostly_cloudy, cloudy, overcast
+clouds: partly_cloudy, cloudy
 
-rain: chance_of_rain, light_rain, showers, rain
+rain: rain, hail
 
-snow: sleet, snow_showers
+snow: sleet, snow
+
+windy: wind, tornado
+
+thunder: thunderstorm
 
 misc: fog
 
@@ -56,5 +60,5 @@ Append "_night" to let them be used at night.
 
 Options can be changed permanent if stored in .izulu/config.
 .SH "AUTHOR"
-This manual page was written by Malte Paskuda <MPaskuda@web.de>,
+This manual page was written by Malte Paskuda <malte@paskuda.biz>,
 and may be used by others.
