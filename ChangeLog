@@ -1,3 +1,11 @@
+1.0
+    * Remove-woeid parameter. Add --latitude LAT:LON, short form -l, to set the position 
+      alternatively to -c. 
+    * Remvoed some weather substates, see the readme or the manual for the new list
+    * Added forecast icon for wind and fog
+    * Fix weather API by moving to dark sky forecast api via a custom server. Note that 
+      the server is heavily rate limited as the api calls per day are very limited, and
+      results are cached for half an hour.
 0.5:
     * Add --temperature-gravity, --temperature-margin and --compat parameters. This makes
       it possible to use the temperature display with DEs like unity that would otherwise
