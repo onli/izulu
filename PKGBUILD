@@ -2,13 +2,13 @@
 
 _pkgname=izulu
 pkgname=${_pkgname}-git
-pkgver=0.6.4
+pkgver=1.0
 pkgrel=1
 pkgdesc='weather aware desktop background images'
 arch=('any')
 url='https://github.com/onli/izulu'
 license=('GPL')
-depends=( 'bash' 'imagemagick' 'xmlstarlet' 'perl-xml-twig' )
+depends=( 'bash' 'imagemagick' 'perl-xml-twig' 'bc' 'jq' )
 makedepends=( 'git' )
 source=("${_pkgname}::git+https://github.com/onli/izulu.git")
 sha1sums=('SKIP')
