@@ -451,6 +451,9 @@ getWPCommand() {
             gsettings set org.gnome.desktop.background picture-options "stretched"
             echo "gsettings set org.gnome.desktop.background picture-uri file://"
         fi
+    elif [ x"$XDG_CURRENT_DESKTOP" = x"MATE" ];then
+        gsettings set org.mate.background picture-options "stretched"
+        echo "gsettings set org.mate.background picture-filename"
     elif xprop -root _DT_SAVE_MODE | grep ' = \"xfce4\"$' >/dev/null 2>&1; then
         echo "xfdesktop --reload"
     elif command -v Esetroot > /dev/null; then
