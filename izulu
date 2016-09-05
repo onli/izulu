@@ -194,7 +194,7 @@ setImage() {
             local tmpicon=$(mktemp)
             cp "/usr/share/izulu/$icon" "$tmpicon"
             local day=$(date -d @$(echo "$WEATHER_DATA" | jq -r '.daily.data['$i'].time') "+%A")
-            convert "$tmpicon" -gravity South -fill '#c0bfbd' -font Helvetica -background '#0000' -pointsize 16 -splice 0x24  -annotate +0+2 "${day:0:3}" "$tmpicon"
+            convert "$tmpicon" -gravity South -fill '#c0bfbd' -font DejaVu-Sans-Condensed -background '#0000' -pointsize 16 -splice 0x24  -annotate +0+2 "${day:0:3}" "$tmpicon"
             
             # at least +20 y height to be above typical taskbar
             convert -depth 8 -gravity SouthEast -geometry +$((330-(i+1)*64))+20 "$tmpimage" "$tmpicon" -composite "$tmpimage"          
@@ -204,7 +204,7 @@ setImage() {
     if [ "$TEMPERATURE" == "TRUE" ];then
         local temperature=$(echo "$WEATHER_DATA" | jq -r '.currently.temperature')
         # yql is only giving us fahrenheit values, so we have to convert it into a sane unit
-        convert -gravity "$TEMPERATURE_GRAVITY" "$tmpimage" -font Helvetica -pointsize 36 -fill '#c0bfbd' -background '#0000' -annotate "$TEMPERATURE_MARGIN" "${temperature%.*}°C" "$tmpimage"
+        convert -gravity "$TEMPERATURE_GRAVITY" "$tmpimage" -font DejaVu-Sans-Condensed -pointsize 36 -fill '#c0bfbd' -background '#0000' -annotate "$TEMPERATURE_MARGIN" "${temperature%.*}°C" "$tmpimage"
     fi
     
     addRadar "$tmpimage"
@@ -558,7 +558,7 @@ while [[ $# -gt 0 ]] ; do
             RADAROPTIONS=()
             for option in $*;do
                 if [ "${option:0:1}" == "-" ];then
-                    #this option dont belongs to the radarswitch anymore
+                    #this option doesn't belongs to the radarswitch anymore
                     break
                 else
                     RADAROPTIONS[${#RADAROPTIONS[*]}]="$option"
@@ -601,7 +601,7 @@ while [[ $# -gt 0 ]] ; do
             ;;
 
         --version)
-            echo "izulu 1.0"
+            echo "izulu 1.0.1"
             exit 0
             ;;
     esac
