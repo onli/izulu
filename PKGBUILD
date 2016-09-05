@@ -2,7 +2,7 @@
 
 _pkgname=izulu
 pkgname=${_pkgname}-git
-pkgver=1.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc='weather aware desktop background images'
 arch=('any')

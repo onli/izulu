@@ -1,3 +1,7 @@
+1.0.1
+    * Fix: Switch to DejaVu font to prevent Arch compatibility issue
+    * Fix: OSD not triggered in daemon mode when getting random images
+    * Fix: Support for Mate DE
 1.0
     * Remove --woeid parameter. Add --latitude LAT:LON, short form -l, to set the position 
       alternatively to -c. 
