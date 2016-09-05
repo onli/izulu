@@ -1,5 +1,5 @@
 use Frinfon;
-use LWP::Simple;
+use HTTP::UserAgent;
 use JSON::Fast;
 use Cache::LRU;
 use Config::INI;
@@ -11,6 +11,8 @@ my %config = Config::INI::parse_file('keys.ini');
 
 my $try = 0;
 my $cache = Cache::LRU.new(size => 1024);
+my $ua = HTTP::UserAgent.new;
+$ua.timeout = 10;
 
 get '/forecast/:place' => sub ($c) {
     my $city = $c.captured<place>;
@@ -28,23 +30,31 @@ sub getForecast($latitude, $longitude) {
     if ($cached_page && ($cached_page[0] > (DateTime.now().posix()))) {
         return $cached_page[1];
     }
-    my $forecastURL = "https://api.forecast.io/forecast/%config<_><forecast>/$latitude,$longitude?units=si&exclude=minutely,hourly,alerts,flags";
-    my $data = LWP::Simple.get($forecastURL);
-    $cache.set($key, [DateTime.now().posix() + 1790, $data]);
-    return $data
+    my $response = $ua.get("https://api.forecast.io/forecast/%config<_><forecast>/$latitude,$longitude?units=si&exclude=minutely,hourly,alerts,flags");
+    if $response.is-success {
+        my $data = $response.content;
+        my $cachetime = $response.header.field('Cache-Control').Str.subst('max-age=', '');  # currently always 3600, but maybe some day they will implement more accurate caching
+        $cache.set($key, [DateTime.now().posix() + $cachetime, $data]);
+        return $data;
+    }
 }
 
 sub getCoordinates($city) {
     try {
-        my $where = from-json(LWP::Simple.get("https://maps.googleapis.com/maps/api/geocode/json?address=$city&key=%config<_><google>"));
-        return ($where{'results'}[0]{'geometry'}{'location'}{'lat'}, $where{'results'}[0]{'geometry'}{'location'}{'lng'});
+        my $response = $ua.get("https://maps.googleapis.com/maps/api/geocode/json?address=$city&key=%config<_><google>");
+        if $response.is-success {
+            my $where = from-json($response.content);
+            return ($where{'results'}[0]{'geometry'}{'location'}{'lat'}, $where{'results'}[0]{'geometry'}{'location'}{'lng'});
+        } else {
+            die $response.status-line;
+        }
         
         CATCH {
             default {
                 $try++;
                 sleep 3;
                 if ($try < 3) {
-                    getCoordinates($city)
+                    getCoordinates($city);
                 }
             }
         }

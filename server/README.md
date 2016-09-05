@@ -4,7 +4,7 @@ weather server for izulu, providing access to forecast.io
 
 perl6 and its modules:
 
-   panda install Frinfon LWP::Simple IO::Socket::SSL Cache::LRU Config::INI
+   panda install Frinfon HTTP::UserAgent IO::Socket::SSL Cache::LRU Config::INI
 
 ## Start
 
