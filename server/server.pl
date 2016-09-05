@@ -11,6 +11,7 @@ my %config = Config::INI::parse_file('keys.ini');
 
 my $try = 0;
 my $cache = Cache::LRU.new(size => 1024);
+my $coordcache = Cache::LRU.new(size => 1024);
 my $ua = HTTP::UserAgent.new;
 $ua.timeout = 10;
 
@@ -25,7 +26,7 @@ get '/forecast/:latitude/:longitude' => sub ($c) {
 };
 
 sub getForecast($latitude, $longitude) {
-    my $key = $latitude + ' ' + $longitude;
+    my $key = "$latitude $longitude";
     my $cached_page = $cache.get($key);
     if ($cached_page && ($cached_page[0] > (DateTime.now().posix()))) {
         return $cached_page[1];
@@ -41,9 +42,14 @@ sub getForecast($latitude, $longitude) {
 
 sub getCoordinates($city) {
     try {
+        my $location = $coordcache.get($city);
+        if ($location) {
+            return $location{'lat'}, $location{'lng'};
+        }
         my $response = $ua.get("https://maps.googleapis.com/maps/api/geocode/json?address=$city&key=%config<_><google>");
         if $response.is-success {
             my $where = from-json($response.content);
+            $coordcache.set($city, $where{'results'}[0]{'geometry'}{'location'});
             return ($where{'results'}[0]{'geometry'}{'location'}{'lat'}, $where{'results'}[0]{'geometry'}{'location'}{'lng'});
         } else {
             die $response.status-line;
