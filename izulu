@@ -155,7 +155,6 @@ setWallpaper() {
         random_image=$(cycleWallpaper "$specific" "$generic")
         if [[ -n "$random_image" ]];then
             setImage "$random_image"
-                osdNotify "$(echo "$WEATHER_DATA" | jq -r '.currently.summary')"
             return
         fi
         
@@ -178,9 +177,6 @@ setWallpaper() {
                 setImage /usr/share/izulu/"$generic"
             fi
         fi
-    fi
-    if [ "$random_override" != "TRUE" ];then
-        osdNotify "$(echo "$WEATHER_DATA" | jq -r '.currently.summary')"
     fi
 }
 
@@ -220,6 +216,7 @@ setImage() {
     else
         $WPCOMMAND "$HOME/.izulu/izulucurrent" &
     fi
+    osdNotify "$(echo "$WEATHER_DATA" | jq -r '.currently.summary')"
 }
 
 addRadar() {
@@ -445,7 +442,7 @@ getCountry() {
 getWPCommand() {
     #partly taken from xdg-open
     if [ x"$DESKTOP_SESSION" = x"ubuntu"  ] || [ x"$DESKTOP_SESSION" = x"ubuntu-2d" ];then
-	gsettings set org.gnome.desktop.background picture-options "stretched"
+        gsettings set org.gnome.desktop.background picture-options "stretched"
         echo "gsettings set org.gnome.desktop.background picture-uri file://"
     elif [ x"$GNOME_DESKTOP_SESSION_ID" != x"" ] || [ x"$DESKTOP_SESSION" = x"gnome" ];then
         if command -v gnome-about > /dev/null; then
