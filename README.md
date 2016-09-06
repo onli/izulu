@@ -22,11 +22,9 @@ and install **izulu**
     
 ### Arch Linux
 
-Use pacman and the provided PKGBUILD to install:
+Install izulu-git from [the AUR](https://aur.archlinux.org/packages/izulu-git/)
 
-    wget https://raw.githubusercontent.com/onli/izulu/master/PKGBUILD #download "PKGBUILD" file
-    makepkg
-    sudo pacman -U izulu-git-*.pkg.tar.xz
+    yaourt -S izulu-git
 
 ### Gentoo/Funtoo
 
