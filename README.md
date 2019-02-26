@@ -46,7 +46,7 @@ Download this repository and install with:
 
 Install the dependencies (on Ubuntu):
 
-    sudo apt-get install imagemagick xmlstarlet jq bc
+    sudo apt-get install imagemagick xmlstarlet jq bc xml-twig-tools gettext
 
 On older Ubuntu systems, install also `notify-send`. It is not strictly necessary, only if `--osd` is specified to show notifications on weather change.
 
