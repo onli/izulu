@@ -31,7 +31,7 @@ sub getForecast($latitude, $longitude) {
     if ($cached_page && ($cached_page[0] > (DateTime.now().posix()))) {
         return $cached_page[1];
     }
-    my $response = $ua.get("https://api.forecast.io/forecast/%config<_><forecast>/$latitude,$longitude?units=si&exclude=minutely,hourly,alerts,flags");
+    my $response = $ua.get("https://api.darksky.net/forecast/%config<_><forecast>/$latitude,$longitude?units=si&exclude=minutely,hourly,alerts,flags");
     if $response.is-success {
         my $data = $response.content;
         my $cachetime = $response.header.field('Cache-Control').Str.subst('max-age=', '');  # currently always 3600, but maybe some day they will implement more accurate caching
@@ -44,13 +44,13 @@ sub getCoordinates($city) {
     try {
         my $location = $coordcache.get($city);
         if ($location) {
-            return $location{'lat'}, $location{'lng'};
+            return $location[0], $location[1];
         }
-        my $response = $ua.get("https://maps.googleapis.com/maps/api/geocode/json?address=$city&key=%config<_><google>");
+        my $response = $ua.get("https://api.mapbox.com/geocoding/v5/mapbox.places/$city.json?access_token=%config<_><mapbox>&autocomplete=true");
         if $response.is-success {
             my $where = from-json($response.content);
-            $coordcache.set($city, $where{'results'}[0]{'geometry'}{'location'});
-            return ($where{'results'}[0]{'geometry'}{'location'}{'lat'}, $where{'results'}[0]{'geometry'}{'location'}{'lng'});
+            $coordcache.set($city, $where{'features'}[0]{'center'});
+            return ($where{'features'}[0]{'center'}[0], $where{'features'}[0]{'center'}[1]);
         } else {
             die $response.status-line;
         }
