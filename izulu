@@ -144,7 +144,7 @@ setWallpaper() {
     
     if [[ -n "$current" ]];then
         if [ "$current" == "$specific" ];then
-            if [ ! "$TEMPERATURE" == "TRUE" ] && [ ! "$SWISS_RADAR" == "TRUE" ] && [ ! "$GERMAN_RADAR" == "TRUE" ] && [ ! "$RADAR" == "TRUE" ];then
+            if [ ! "$TEMPERATURE" == "TRUE" ] && [ ! "$SWISS_RADAR" == "TRUE" ] && [ ! "$GERMAN_RADAR" == "TRUE" ] && [ ! "$RADAR" == "TRUE" ] && [ ! "$RANDOMLY" == "TRUE" ] ;then
                 #no dynamic features, so no change necessary
                 return
             fi
