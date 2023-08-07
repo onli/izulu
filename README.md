@@ -44,7 +44,7 @@ and install with emerge
 
 Install the dependencies (on Ubuntu):
 
-    sudo apt-get install imagemagick jq bc gettext gawk
+    sudo apt-get install imagemagick jq bc gettext gawk x11-utils
 
 Download this repository and install with:
 
@@ -52,6 +52,8 @@ Download this repository and install with:
     sudo make install # (or use checkinstall)
 
 On older Ubuntu systems, install also `notify-send` (new ones will have it already installed). It is not strictly necessary, only if `--osd` is specified to show notifications on weather change.
+
+The package x11-utils is used for the `xdpyinfo` command, other distributions (like Void Linux) might package it separately.
 
 ## Start
 
