@@ -28,19 +28,7 @@ Install izulu-git from [the AUR](https://aur.archlinux.org/packages/izulu-git/)
 
     yaourt -S izulu-git
 
-### Gentoo/Funtoo
-
-Use the [overlay](https://github.com/onli/overlay ) with layman
-
-    layman -o https://raw.github.com/onli/overlay/master/repositories.xml -f -a onli
-    
-and install with emerge
-
-    emerge izulu
-
-
 ### Manual
-
 
 Install the dependencies (on Ubuntu):
 
