@@ -1,3 +1,17 @@
+2.0:
+    * Moved to working APIs that do not need our own server: brightsky.dev for current
+      weather, api.met.no for the forecast and location.services.mozilla.com for the
+      geolocation.
+      Note: brightsky uses the DWD, a german service. Data outside of Germany is limited.
+    * Breaking change: Removed radar feature
+    * Breaking change: Removed feature to randomly select an image from a directory
+    * Breaking change: Removed feature to randomly select an image from flickr
+    * Breaking change: Location now needs to be specified by -l LAT:LON or via the config,
+                       the city feature was removed (not supported by mozilla API).
+    * Breaking change: Renamed -p/--preview to -f/--forecast
+    * Forecast now shows icon for the next 12h interval, not the current, following, ...
+      day (data is provided as such from the met.no API)
+
 1.1.0:
     * Fix: Move server part to working APIs (mapbox + current darksky url)
     * Always refresh the wallpaper at --interval When --random is set
