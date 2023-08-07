@@ -153,23 +153,29 @@ setImage() {
     if [ "$FORECAST" == "TRUE" ];then
         local url="https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=$LATITUDE&lon=$LONGITUDE"
         local forecastData=$(fetchUrl "$url")
-        for i in {0..4};do
+        for i in {0..3};do
             # merge forecast-icons with background-image
             local icon=$(echo "$forecastData" | jq -r '.properties.timeseries['$(($i * 12))'].data.next_12_hours.summary.symbol_code')
             local tmpicon=$(mktemp)
             cp "/usr/share/izulu/weathericons/$icon.png" "$tmpicon"
             convert "$tmpicon" -resize 64x64 "$tmpicon"
-            convert "$tmpicon" -gravity South -fill '#c0bfbd' -font DejaVu-Sans-Condensed -background '#0000' -pointsize 16 -splice 0x24  -annotate +0+2 "+12h" "$tmpicon"
+            convert "$tmpicon" -gravity South -fill '#E4E4E4' -font DejaVu-Sans-Condensed -background 'transparent' -pointsize 20 -splice 0x22 -annotate +0+4 "+12h" \
+                \( +clone -background '#424242'  -shadow 100x3+0+0 \
+                -channel A -level 0,50% +channel \) +swap \
+                +repage -gravity center -composite "$tmpicon"
             
             # at least +20 y height to be above typical taskbar
-            convert -depth 8 -gravity SouthEast -geometry +$((330-(i+1)*64))+20 "$tmpimage" "$tmpicon" -composite "$tmpimage"          
+            convert -depth 8 -gravity SouthEast -geometry +$((260-(i+1)*64))+20 "$tmpimage" "$tmpicon" -composite "$tmpimage"          
         done
     fi
 
     if [ "$TEMPERATURE" == "TRUE" ];then
         local temperature=$(echo "$WEATHER_DATA" | jq -r '.weather.temperature')
-        # yql is only giving us fahrenheit values, so we have to convert it into a sane unit
-        convert -gravity "$TEMPERATURE_GRAVITY" "$tmpimage" -font DejaVu-Sans-Condensed -pointsize 36 -fill '#c0bfbd' -background '#0000' -annotate "$TEMPERATURE_MARGIN" "${temperature%.*}°C" "$tmpimage"
+        convert "$tmpimage" \
+            \( -size "80x60" -background none -font DejaVu-Sans-Condensed -pointsize 36 -fill "#E4E4E4" caption:"${temperature%.*}°C" \
+            \( +clone -background "#424242" -shadow 80x3+1+1  \) +swap -background none -layers merge +repage \) -gravity "$TEMPERATURE_GRAVITY" -composite \
+            "$tmpimage"
+            
     fi
     cp "$tmpimage" "$HOME"/.izulu/izulucurrent
     rm "$tmpimage"
