@@ -47,7 +47,7 @@ The package x11-utils is used for the `xdpyinfo` command, other distributions (l
 
 To use all common features, start izulu like this:
 
-    izulu --daemon --night --preview --temperature --osd &
+    izulu --daemon --night --forecast --temperature --osd &
 
 Optionally, use `-l LAT:LON` to set your current location manually. 
     
