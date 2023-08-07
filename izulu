@@ -22,21 +22,27 @@
 # $2 longitude, not needed if $1 was a city
 # return: current weather
 getWeather() {    
-    echo "$WEATHER_DATA" | jq -r '.currently.icon'  # -r makes jq not put " around the string, which is important for the later ifs
+    echo "$WEATHER_DATA" | jq -r '.weather.icon'  # -r makes jq not put " around the string, which is important for the later ifs
 }
 
 
 # fill WEATHER_DATA with weather API result. NOTE: Always run this at top level, not in a subshell
-# $1: city or latitude
-# $2: longitude, not needed if $1 was a city
 # return: Weather api data (currently JSON)
-fillWeatherData() {
-    if [ -n "$LATITUDE" ];then
-        local url="http://izulu.onli-blogging.de/forecast/$LATITUDE/$LONGITUDE"
-    else
-        local url="http://izulu.onli-blogging.de/forecast/$CITY"
-    fi
-    WEATHER_DATA=$(wget -q -O - "$url")
+setWeatherData() {
+    local url="https://api.brightsky.dev/current_weather?lat=$LATITUDE&lon=$LONGITUDE"
+    WEATHER_DATA=$(fetchUrl "$url")
+}
+
+# Set global LATITUDE and LONGITUDE, to be called at program start if not manually supplied
+setCoordinates() {
+    local coords=$(fetchUrl "https://location.services.mozilla.com/v1/geolocate?key=geoclue")
+    LATITUDE=$(echo "$coords" | jq -r '.location.lat')
+    LONGITUDE=$(echo "$coords" | jq -r '.location.lng')
+}
+
+# Download the given url, with a correct user agent set
+fetchUrl() {
+    echo $(wget --user-agent="izulu" -q -O - "$1")
 }
 
 
@@ -133,33 +139,23 @@ chooseWallpaper() {
     esac
 }
 
-#Choose the wallpaper
-#$1: the image for the specific state
-#$2: the image for the generic state, fallback
-#$3: If set to anything, random-mode will not be triggered 
+# Choose the wallpaper
+# $1: the image for the specific state
+# $2: the image for the generic state, fallback
+# $3: If set to anything, random-mode will not be triggered 
 setWallpaper() {
     local specific="$1"
     local generic="$2"
-    local random_override="$3"
     
     if [[ -n "$current" ]];then
         if [ "$current" == "$specific" ];then
-            if [ ! "$TEMPERATURE" == "TRUE" ] && [ ! "$SWISS_RADAR" == "TRUE" ] && [ ! "$GERMAN_RADAR" == "TRUE" ] && [ ! "$RADAR" == "TRUE" ] && [ ! "$RANDOMLY" == "TRUE" ] ;then
+            if [ ! "$TEMPERATURE" == "TRUE" ] ;then
                 #no dynamic features, so no change necessary
                 return
             fi
         fi
     fi
     current="$specific"
-    if [ "$RANDOMLY" == "TRUE" ] && [[ -z "$random_override" ]];then
-        random_image=$(cycleWallpaper "$specific" "$generic")
-        if [[ -n "$random_image" ]];then
-            setImage "$random_image"
-            return
-        fi
-        
-    fi
-
     if isNight;then
         specific="$specific"_night
         generic="$generic"_night
@@ -186,9 +182,9 @@ setImage() {
     local tmpimage=$(mktemp)
     # store for later merge - and to be able to write
     cp "$1"  "$tmpimage"
-    if [ "$PREVIEW" == "TRUE" ];then
+    if [ "$FORECAST" == "TRUE" ];then
         for i in {0..4};do
-            # merge preview-icons with background-image
+            # merge forecast-icons with background-image
             local forecast=$(echo "$WEATHER_DATA" | jq -r '.daily.data['$i'].icon')
             local icon=$(chooseForecastIcon "$forecast")
             local tmpicon=$(mktemp)
@@ -202,12 +198,10 @@ setImage() {
     fi
 
     if [ "$TEMPERATURE" == "TRUE" ];then
-        local temperature=$(echo "$WEATHER_DATA" | jq -r '.currently.temperature')
+        local temperature=$(echo "$WEATHER_DATA" | jq -r '.weather.temperature')
         # yql is only giving us fahrenheit values, so we have to convert it into a sane unit
         convert -gravity "$TEMPERATURE_GRAVITY" "$tmpimage" -font DejaVu-Sans-Condensed -pointsize 36 -fill '#c0bfbd' -background '#0000' -annotate "$TEMPERATURE_MARGIN" "${temperature%.*}°C" "$tmpimage"
     fi
-    
-    addRadar "$tmpimage"
     
     cp "$tmpimage" "$HOME"/.izulu/izulucurrent
     rm "$tmpimage"
@@ -217,74 +211,6 @@ setImage() {
         $WPCOMMAND "$HOME/.izulu/izulucurrent" &
     fi
     osdNotify "$(echo "$WEATHER_DATA" | jq -r '.currently.summary')"
-}
-
-addRadar() {
-    local tmpimage="$1"
-    if [ "$SWISS_RADAR" == "TRUE" ];then
-        addSwissImage "$tmpimage" warning radar
-        return
-    fi
-    if [ "$GERMAN_RADAR" == "TRUE" ];then
-        addGermanImage "$tmpimage"
-        return
-    fi
-    if [ "$RADAR" == "TRUE" ];then
-        if contains "${RADAROPTIONS[*]}" "germany";then
-            local country="DE"
-        elif contains "${RADAROPTIONS[*]}" "swiss";then
-            local country="CH"
-        else
-            local country=$(getCountry)
-        fi
-        if ! contains "${RADAROPTIONS[*]}" "radar" &&  ! contains "${RADAROPTIONS[*]}" "warning";then
-            local options=("warning" "radar")
-        else
-            local options=()
-            for image in ${RADAROPTIONS[*]};do
-                if [ "$image" == "radar" ] || [ "$image" == "warning" ];then
-                    options[${#options[*]}]="$image"
-                fi
-            done
-        fi
-        if [ "$country" == "DE" ];then
-            addGermanImage "$tmpimage" ${options[*]}
-        elif [ "$country" == "CH" ];then
-            addSwissImage  "$tmpimage" ${options[*]} 
-        fi
-    fi
-}
-
-addGermanImage() {
-    local i=0
-    local tmpimage="$1"
-   
-    local radarimage=$(mktemp)
-    wget -O - -q ftp://ftp.dfd.dlr.de/put/wetterbilder/Central_Europe/image1.jpg > "$radarimage"
-    #grab germany from the image of europe:
-    convert "$radarimage" -crop 650x900+274+120 "$radarimage"
-    convert "$radarimage" -resize 178 "$radarimage"
-    composite -gravity SouthEast -geometry +2+128 "$radarimage" "$tmpimage" "$tmpimage"
-    rm "$radarimage"
-}
-
-addSwissImage() {
-    local i=0
-    local tmpimage="$1"
-    for image in $*;do
-        let i++
-        if [ "$image" == "warning" ];then
-            local wetteralarm=$(mktemp)
-            wget -O - -q http://www.wetteralarm.ch/uploads/tx_namicswawetterkarte/bilder/wetterkarten/all_klein.jpg > "$wetteralarm"
-            convert "$wetteralarm" -resize 178 "$wetteralarm"
-            if [[ $i -eq 2 ]];then
-                composite -gravity SouthEast -geometry +2+128 "$wetteralarm" "$tmpimage" "$tmpimage"
-            else    
-                composite -gravity SouthEast -geometry +2+245 "$wetteralarm" "$tmpimage" "$tmpimage"
-            fi
-            rm "$wetteralarm"
-        fi
-    done
 }
 
 contains() {
@@ -313,106 +239,10 @@ osdNotify() {
     fi
 }
 
-#choose randomly a wallpaper
-#$1: wallpaper-category
-#return: wallpaper to set
-cycleWallpaper() {
-    local specific="$1"
-    local generic="$2"
-    local randomdir=""
-
-    case "$generic" in
-        "gen_sun")      
-            randomdir="$RANDOMSUNDIR"
-            ;;
-        "gen_cloud")
-            randomdir="$RANDOMCLOUDDIR"
-            ;;
-        "gen_rain")
-            randomdir="$RANDOMRAINDIR"
-            ;;
-        "gen_snow")
-            randomdir="$RANDOMSNOWDIR"
-            ;;
-        *)
-            randomdir="$RANDOMMISCDIR"
-            ;;
-    esac 
-
-    if [[ -z "$randomdir" ]];then
-        flickrimg=$(getFlickrImage "$generic")
-        if [[ -z "$flickrimg" ]];then
-            setWallpaper "$specific" "$generic" "TRUE"
-            return 1
-        else
-            echo "$flickrimg"
-            return 0
-        fi
-    fi
-    
-    
-    # The IFS set to \n enables files with spaces
-    OLD_IFS=$IFS
-    IFS=$'\n'
-    # this gets all image files in randomdir and subdirs. The ${} around $randomdir is necessary to evaluate variables like ~
-    pictures=($(echo -e "$(find ${randomdir} -name '*' -exec file {} \; | grep -o -P '^.+: \w+ image' | sed s"#.*\($randomdir.*\):.*#\1#"g | sort)"))
-    IFS=$OLD_IFS
-    chosen=$(shuf -i1-${#pictures[@]} -n1)
-    echo "${pictures[$chosen]}"
-}
-
-getFlickrImage() {
-    local generic="$1"
-    # flickriver sorts the flickr groups images randomly for us
-    local riverurl=""
-    case "$generic" in
-        "gen_sun")      
-            riverurl="http://www.flickriver.com/groups/982364@N21/pool/random/"
-            ;;
-        "gen_cloud")
-            riverurl="http://www.flickriver.com/groups/clouds-mildness/pool/random/"
-            ;;
-        "gen_rain")
-            riverurl="http://www.flickriver.com/groups/387174@N22/pool/random/"
-            ;;
-        "gen_snow")
-            riverurl="http://www.flickriver.com/groups/snow_pictures/pool/random/"
-            ;;
-        "gen_wind")
-            riverurl="http://www.flickriver.com/groups/1159117@N24/pool/random/"
-            ;;
-        *)
-            # misc, mainly fog
-            riverurl="http://www.flickriver.com/groups/fabulousfog/pool/random/"
-            ;;
-    esac
-    local flickrpage=$(wget -O - --quiet $(wget -O - "$riverurl" --quiet | grep "class=\"noborder\"  target=\"_blank\".*http://www.flickr.com/photos" | sed 's#.*href=\"\([^\"]*\)\".*#\1#g' | uniq | shuf -n 1))
-    local imagesizes=$(echo -e "$flickrpage" | grep modelExport: | tr "}" "\n")
-    for size in "k" "o" "h" "l";do
-        # not all flickr images provide every size, so we try to get the best one
-        # It is nicer to prefer a size with a specific width, that is why Original is not first
-        local imageurl=$(echo -e "$imagesizes" | grep "\"$size\"" | sed -e 's#.*\(c[0-9].staticflickr.com.*\).*"#https://\1#g' -e 's#\\##g' -e 's#\".*##')
-        if [[ -n  "$imageurl" ]];then
-            break
-        fi
-    done
-   
-    if [[ -z "$imageurl" ]];then
-        return 1
-    fi
-    if [[ -z "$FLICKRTMP" ]];then
-        FLICKRTMP=$(mktemp)
-    fi
-    if wget -O "$FLICKRTMP" "$imageurl" --quiet;then
-        echo "$FLICKRTMP"
-    else
-        return 1
-    fi
-}
-
 
 # Return true if we know it is night, and user did ctivate the night mode
 # This will only work well if the local time is in the same timezone as the detected place
+# TODO: Repair
 isNight() {
     current_time=$(date "+%s")
     sunrise=$(echo "$WEATHER_DATA" | jq -r '.daily.data[0].sunriseTime')
@@ -421,24 +251,7 @@ isNight() {
     return $(echo "(! $current_time < $sunrise || $current_time > $sunset)" | bc -l)
 }
 
-#determine the city via the geoip-api
-getCity() {
-    ipApiLookup=$(wget -O - -q "http://freegeoip.net/xml/")
-    local city=$(echo "$ipApiLookup" | xml_grep --text_only '/Response/City')
-    if command -v notify-send >/dev/null;then
-        notify-send -u low "izulu" "$city"
-    fi
-    echo $city
-}
-
-#determine the country via the geoip-api
-getCountry() {
-    ipApiLookup=$(wget -O - -q "http://freegeoip.net/xml/")
-    local country=$(echo "$ipApiLookup" | xml_grep --text_only '/Response/CountryCode')
-    echo $country
-}
-
-#check in which environment we run to select a command to set a wallpaper
+# Check in which environment we run to select a command to set a wallpaper
 getWPCommand() {
     #partly taken from xdg-open
     if [ x"$DESKTOP_SESSION" = x"ubuntu"  ] || [ x"$DESKTOP_SESSION" = x"ubuntu-2d" ];then
@@ -473,16 +286,9 @@ checkConfig() {
     fi
     if [[ ! -e "$HOME/.izulu/config" ]];then
         echo "WPCOMMAND=\"\"   #command to set the wallpaper
-CITY=\"\"
 LATITUDE=\"\"
 LONGITUDE=\"\"
-WIND=\"\"
-SWISS_RADAR=\"\"
-RANDOMSUNDIR=\"\"   #Directories with pictures to randomly pick one
-RANDOMCLOUDDIR=\"\"
-RANDOMRAINDIR=\"\"
-RANDOMSNOWDIR=\"\"
-RANDOMMISCDIR=\"\"" > "$HOME/.izulu/config"
+" > "$HOME/.izulu/config"
     fi
    
 }
@@ -494,11 +300,12 @@ readConfig() {
 # set default variables
 TEMPERATURE_GRAVITY="SouthWest"
 TEMPERATURE_MARGIN="+10+20"
+INTERVAL=900
 
 checkConfig
 readConfig
 
-#read arguments
+# Read given script arguments
 while [[ $# -gt 0 ]] ; do
     parm="$1"
     shift
@@ -514,29 +321,17 @@ while [[ $# -gt 0 ]] ; do
         -d | --daemon)
             DAEMON=TRUE
             ;;
-        -i | --interval)
-            INTERVAL="$1"
-            if [[ "$INTERVAL" -lt 900 ]];then
-                INTERVAL=900
-            fi
-            ;;
-        -r | --random)
-            RANDOMLY=TRUE
-            ;;
         -n | --night)
             NIGHT=TRUE
             ;;
         -o | --osd)
             OSD=TRUE
             ;;
-        -p | --preview)
-            PREVIEW=TRUE
+        -f | --forecast)
+            FORECAST=TRUE
             ;;
         -t | --temperature)
             TEMPERATURE=TRUE
-            ;;
-        -w | --wind)
-            WIND=TRUE
             ;;
         -tg | --temperature-gravity)
             TEMPERATURE_GRAVITY="$1"
@@ -550,48 +345,17 @@ while [[ $# -gt 0 ]] ; do
                 TEMPERATURE_MARGIN="+10+40"
             fi
             ;;
-        -gr | --german-radar)
-            GERMAN_RADAR=TRUE
-            ;;
-        -sr | --swiss-radar)
-           SWISS_RADAR=TRUE
-           ;;
-        -rd | --radar)
-            RADAR=TRUE
-            RADAROPTIONS=()
-            for option in $*;do
-                if [ "${option:0:1}" == "-" ];then
-                    #this option doesn't belongs to the radarswitch anymore
-                    break
-                else
-                    RADAROPTIONS[${#RADAROPTIONS[*]}]="$option"
-                    shift
-                fi
-            done
-            ;;
         --help)
-            echo "-c city, --city city:
-    Set the city with the relevant weather, e.g Berlin.
--l LAT:LON, --latitude LAT:LON:
+            echo "-l LAT:LON, --latitude LAT:LON:
     Give the current position as latitude and longitude
 -d, -daemon:
     Enable daemon-mode, check the weather every 15 minutes.
--gr, --german-radar
-    Shortcut: All german rader images.
--i interval, --interval interval:
-    Specify a custom check-interval when in daemon-mode, e.g. 900 (seconds, also the minimun).
 -n, --night:
     Set another wallpaper at night.
 -o, --osd:
     Send a notification when weather changes.
--p, --preview
+-f, --forecast
     Add images showing the weather forecast.
--r, --random:
-    Choose the wallpaper randomly. If no directory is named in the config, it will try to get a fitting image from flickr.
--rd [warning|radar] [warning|radar] [germany|swiss], --radar [warning|radar] [warning|radar] [germany|swiss]:
-    Show a warning and/or a radarimage for a country. Wetteralarm (www.wetteralarm.ch) and Rain-Radar (meteoschweiz.admin.ch) for Switzerland, official warnings (http://www.dwd.de/) and a satellite-image (http://www.dlr.de/) for Germany.
--sr, --swiss-radar
-    Shortcut: All swiss rader images.
 -t, --temperature
     Show the temperature.
 -tg gravity, --temperature-gravity gravity
@@ -604,7 +368,7 @@ while [[ $# -gt 0 ]] ; do
             ;;
 
         --version)
-            echo "izulu 1.1.0"
+            echo "izulu 2.0"
             exit 0
             ;;
     esac
@@ -619,18 +383,17 @@ if [ "$WPCOMMAND" == "" ];then
     WPCOMMAND="$(getWPCommand)"
 fi
 
-if [ "$CITY" == "" -a -z "$LATITUDE" ];then
-    CITY="$(getCity)"
-    if [ "$CITY" == "" ];then
-        echo "Error: Your location is not discoverable. Please specify a city with 'izulu -c cityname' or with 'izulu -l LAT:LON'." >&2
+if [ -z "$LATITUDE" ];then
+    setCoordinates
+    if [ "$LATITUDE" == "" ];then
+        echo "Error: Your location is not discoverable. Please specify a city with 'izulu -l LAT:LON'." >&2
         exit 1
     fi
 fi
 
-fillWeatherData
+setWeatherData
 chooseWallpaper "$(getWeather)"
 
-#daemon-mode
 daemon() {
     while true;do
         if [[ -z "$INTERVAL" ]];then
@@ -639,7 +402,7 @@ daemon() {
         
         sleep $INTERVAL
 
-        fillWeatherData
+        setWeatherData
         chooseWallpaper "$(getWeather)"
     done
 }
