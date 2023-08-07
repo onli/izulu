@@ -148,7 +148,7 @@ setImage() {
     local tmpimage=$(mktemp)
     # store for later merge - and to be able to write
     cp "$1"  "$tmpimage"
-    local resolution=$(xdpyinfo | grep dimensions | awk '{ print $3 }')
+    local resolution=$(xdpyinfo | grep dimensions | awk '{ print $2 }')
     convert "$tmpimage" -resize "$resolution" "$tmpimage"
     if [ "$FORECAST" == "TRUE" ];then
         local url="https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=$LATITUDE&lon=$LONGITUDE"
@@ -178,7 +178,7 @@ setImage() {
     else
         $WPCOMMAND "$HOME/.izulu/izulucurrent" &
     fi
-    osdNotify "$(echo "$WEATHER_DATA" | jq -r '.currently.summary')"
+    osdNotify $(getWeather)
 }
 
 contains() {
