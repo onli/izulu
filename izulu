@@ -110,8 +110,13 @@ chooseWallpaper() {
 # $2: the image for the generic state, fallback
 # $3: If set to anything, random-mode will not be triggered 
 setWallpaper() {
-    local specific="$1.jpg"
-    local generic="$2.jpg"
+    if isNight;then
+        specific="$1"_night.jpg
+        generic="$2"_night.jpg
+    else
+        local specific="$1.jpg"
+        local generic="$2.jpg"
+    fi
     
     if [[ -n "$current" ]];then
         if [ "$current" == "$specific" ];then
@@ -122,10 +127,6 @@ setWallpaper() {
         fi
     fi
     current="$specific"
-    if isNight;then
-        specific="$specific"_night
-        generic="$generic"_night
-    fi
     
     if [[ -e "$HOME"/.izulu/"$specific" ]];then
         setImage "$HOME"/.izulu/"$specific" 
@@ -172,9 +173,9 @@ setImage() {
     if [ "$TEMPERATURE" == "TRUE" ];then
         local temperature=$(echo "$WEATHER_DATA" | jq -r '.weather.temperature')
         convert "$tmpimage" \
-            \( -size "80x60" -background none -font DejaVu-Sans-Condensed -pointsize 36 -fill "#E4E4E4" caption:"${temperature%.*}°C" \
-            \( +clone -background "#424242" -shadow 80x3+1+1  \) +swap -background none -layers merge +repage \) -gravity "$TEMPERATURE_GRAVITY" -composite \
-            "$tmpimage"
+            \( -size "90x60" -gravity NorthEast -background none -font DejaVu-Sans-Condensed -pointsize 36 -fill "#E4E4E4" -extent 95 caption:"${temperature%.*}°C" \
+            \( +clone -background "#424242" -shadow 90x3-6+1 -gravity NorthEast \) +swap -background none -layers merge +repage \) \
+            -gravity "$TEMPERATURE_GRAVITY" -composite "$tmpimage"
             
     fi
     cp "$tmpimage" "$HOME"/.izulu/izulucurrent
@@ -227,7 +228,7 @@ isNight() {
     local sunset=$(echo "$sunsetData" | jq -r '.properties.sunset.time')
     local sunsetTimestamp=$(date "+%s" --date="$sunset")
 
-    return $(echo "(! $current_time < $sunriseTimestamp || $current_time > $sunsetTimestamp)" | bc -l)
+    return $(echo "(! ($current_time < $sunriseTimestamp || $current_time > $sunsetTimestamp))" | bc -l)
 }
 
 # Check in which environment we run to select a command to set a wallpaper
