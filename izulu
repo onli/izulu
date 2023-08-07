@@ -240,15 +240,20 @@ osdNotify() {
 }
 
 
+
+
 # Return true if we know it is night, and user did ctivate the night mode
 # This will only work well if the local time is in the same timezone as the detected place
-# TODO: Repair
 isNight() {
     current_time=$(date "+%s")
-    sunrise=$(echo "$WEATHER_DATA" | jq -r '.daily.data[0].sunriseTime')
-    sunset=$(echo "$WEATHER_DATA" | jq -r '.daily.data[0].sunsetTime')
+    local url="https://api.met.no/weatherapi/sunrise/3.0/sun?lat=$LATITUDE&lon=$LONGITUDE"
+    local sunsetData=$(fetchUrl "$url")
+    local sunrise=$(echo "$sunsetData" | jq -r '.properties.sunrise.time')
+    local sunriseTimestamp=$(date "+%s" --date="$sunrise")
+    local sunset=$(echo "$sunsetData" | jq -r '.properties.sunset.time')
+    local sunsetTimestamp=$(date "+%s" --date="$sunset")
 
-    return $(echo "(! $current_time < $sunrise || $current_time > $sunset)" | bc -l)
+    return $(echo "(! $current_time < $sunriseTimestamp || $current_time > $sunsetTimestamp)" | bc -l)
 }
 
 # Check in which environment we run to select a command to set a wallpaper
