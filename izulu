@@ -110,8 +110,8 @@ chooseWallpaper() {
 # $2: the image for the generic state, fallback
 # $3: If set to anything, random-mode will not be triggered 
 setWallpaper() {
-    local specific="$1"
-    local generic="$2"
+    local specific="$1.jpg"
+    local generic="$2.jpg"
     
     if [[ -n "$current" ]];then
         if [ "$current" == "$specific" ];then
@@ -148,10 +148,11 @@ setImage() {
     local tmpimage=$(mktemp)
     # store for later merge - and to be able to write
     cp "$1"  "$tmpimage"
+    local resolution=$(xdpyinfo | grep dimensions | awk '{ print $3 }')
+    convert "$tmpimage" -resize "$resolution" "$tmpimage"
     if [ "$FORECAST" == "TRUE" ];then
         local url="https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=$LATITUDE&lon=$LONGITUDE"
         local forecastData=$(fetchUrl "$url")
-        echo $forecastData
         for i in {0..4};do
             # merge forecast-icons with background-image
             local icon=$(echo "$forecastData" | jq -r '.properties.timeseries['$(($i * 12))'].data.next_12_hours.summary.symbol_code')
@@ -170,7 +171,6 @@ setImage() {
         # yql is only giving us fahrenheit values, so we have to convert it into a sane unit
         convert -gravity "$TEMPERATURE_GRAVITY" "$tmpimage" -font DejaVu-Sans-Condensed -pointsize 36 -fill '#c0bfbd' -background '#0000' -annotate "$TEMPERATURE_MARGIN" "${temperature%.*}°C" "$tmpimage"
     fi
-    
     cp "$tmpimage" "$HOME"/.izulu/izulucurrent
     rm "$tmpimage"
     if [  "${WPCOMMAND:${#WPCOMMAND}-1}" == "/" ];then

@@ -7,6 +7,8 @@ Izulu is a script that fetches the current weather from brightsky and changes th
 
 It can also show the weather forecast (from met.no) and the current temperature (brightsky). As much as possible is detected automatically, like the command to change the background or the current position (via location.services.mozilla.com).
 
+The forecast feature uses the [MET Weather API icons](https://github.com/metno/weathericons) (MIT).
+
 ## Install
 
 ### PPA
@@ -42,14 +44,14 @@ and install with emerge
 
 Install the dependencies (on Ubuntu):
 
-    sudo apt-get install imagemagick jq bc gettext
+    sudo apt-get install imagemagick jq bc gettext gawk
 
 Download this repository and install with:
 
     make
     sudo make install # (or use checkinstall)
 
-On older Ubuntu systems, install also `notify-send`. It is not strictly necessary, only if `--osd` is specified to show notifications on weather change.
+On older Ubuntu systems, install also `notify-send` (new ones will have it already installed). It is not strictly necessary, only if `--osd` is specified to show notifications on weather change.
 
 ## Start
 

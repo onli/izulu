@@ -9,11 +9,8 @@ This manual page documents briefly the
 .B izulu
 command.
 .PP 
-\fBizulu\fP is a tool to change the wallpaper according to the weather. Therefore it reads the Dark Sky Forecast API.
+\fBizulu\fP is a tool to change the wallpaper according to the weather. It calls external APIs to detect the weather at the current location.
 .SH "OPTIONS"
-.TP 
-.B \-c "city"
-Set the city with the relevant weather, e.g Berlin.
 .TP 
 .B \-l "lat:lon"
 Set the current position as latitude and longitude coordinates.
@@ -21,44 +18,37 @@ Set the current position as latitude and longitude coordinates.
 .BI \-d
 Enable daemon\-mode, check the weather every 60 minutes.
 .TP 
-.B \-i "interval"
-Specify a custom check\-interval when in daemon\-mode, e.g. 900 (seconds, also the minimum).
-.TP 
 .BI \-n
 Activate night\-mode, different images will be used at night.
 .TP 
 .BI \-p
 Show the forecast in small preview\-icons.
 .TP 
-.BI \-r
-Choose the wallpaper randomly. Uses the directories named in the config, if none is set it falls back to Flickr.
-.TP 
 .BI \-t 
 Show the temperature
 .TP 
 .TP 
-The command to change the wallpaper, the directories for the random\-mode, the WOEID and the city to check the weather by default may be changed in the config.
+The command to change the wallpaper and the coordinates may be changed in the config ~/.izulu/config.
 .SH "FILES"
-It uses a directory .izulu in home directory and /usr/share/izulu. To override the used images, save them in .izulu in the homedirectory with the name gen_sun, gen_cloud, gen_rain, gen_snow or gen_misc, which are also the images used if no specific image exists.
+This script searches for a directory .izulu in the home directory, and relies on the availability of /usr/share/izulu. To override the used images, save them in ~/.izulu with the name gen_sun.jpg, gen_cloud.jpg, gen_rain.jpg, gen_snow.jpg or gen_misc.jpg, which are also the images used if no specific image exists.
 To use further distinct images, save them as:
 
-sun: clear
+sun: clear.jpg
 
-clouds: partly_cloudy, cloudy
+clouds: partly_cloudy.jpg, cloudy.jpg
 
-rain: rain, hail
+rain: rain.jpg, hail.jpg
 
-snow: sleet, snow
+snow: sleet.jpg, snow.jpg
 
-windy: wind, tornado
+windy: wind.jpg, tornado.jpg
 
-thunder: thunderstorm
+thunder: thunderstorm.jpg
 
-misc: fog
+misc: fog.jpg
 
 Append "_night" to let them be used at night.
 
-Options can be changed permanent if stored in .izulu/config.
 .SH "AUTHOR"
 This manual page was written by Malte Paskuda <malte@paskuda.biz>,
 and may be used by others.

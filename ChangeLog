@@ -11,6 +11,8 @@
     * Breaking change: Renamed -p/--preview to -f/--forecast
     * Forecast now shows icon for the next 12h interval, not the current, following, ...
       day (data is provided as such from the met.no API)
+    * Replace default images with a new selection. The old ones were CC-licensed images
+      taken from Flickr. The news ones are free to use images from unsplash.
 
 1.1.0:
     * Fix: Move server part to working APIs (mapbox + current darksky url)
