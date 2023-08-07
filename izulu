@@ -370,7 +370,8 @@ chooseWallpaper "$(getWeather)"
 daemon() {
     while true;do
         if [[ -z "$INTERVAL" ]];then
-            INTERVAL=3600
+                    # 900 seconds
+            INTERVAL=900
         fi
         
         sleep $INTERVAL
