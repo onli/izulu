@@ -45,40 +45,6 @@ fetchUrl() {
     echo $(wget --user-agent="izulu" -q -O - "$1")
 }
 
-
-# map forecast-code to one of the icons
-chooseForecastIcon() {
-    forecast="$1"
-    
-    case "$forecast" in
-        "cloudy")
-            echo "forecast_cloud"
-            ;;
-        "partly-cloudy-day"|"partly-cloudy-night")
-            echo "forecast_sunnycloud"
-            ;;
-        "rain")
-            echo "forecast_rain"
-            ;;
-        "clear-day"|"clear-night")
-            echo "forecast_sun"
-            ;;
-        "snow" | "sleet")
-            echo "forecast_snow"
-            ;;
-        "thunderstorm")
-            echo "forecast_thunderstorm"
-            ;;
-        "wind")
-            echo "forecast_wind" # TODO: Add forecast image icon
-            ;;
-        "fog")
-            echo "forecast_fog" # TODO: Add forecast image icon
-            ;;
-    esac
-
-}
-
 # set the wallpaper according to the weather
 # $1: current weather
 chooseWallpaper() {
@@ -183,14 +149,16 @@ setImage() {
     # store for later merge - and to be able to write
     cp "$1"  "$tmpimage"
     if [ "$FORECAST" == "TRUE" ];then
+        local url="https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=$LATITUDE&lon=$LONGITUDE"
+        local forecastData=$(fetchUrl "$url")
+        echo $forecastData
         for i in {0..4};do
             # merge forecast-icons with background-image
-            local forecast=$(echo "$WEATHER_DATA" | jq -r '.daily.data['$i'].icon')
-            local icon=$(chooseForecastIcon "$forecast")
+            local icon=$(echo "$forecastData" | jq -r '.properties.timeseries['$(($i * 12))'].data.next_12_hours.summary.symbol_code')
             local tmpicon=$(mktemp)
-            cp "/usr/share/izulu/$icon" "$tmpicon"
-            local day=$(date -d @$(echo "$WEATHER_DATA" | jq -r '.daily.data['$i'].time') "+%A")
-            convert "$tmpicon" -gravity South -fill '#c0bfbd' -font DejaVu-Sans-Condensed -background '#0000' -pointsize 16 -splice 0x24  -annotate +0+2 "${day:0:3}" "$tmpicon"
+            cp "/usr/share/izulu/weathericons/$icon.png" "$tmpicon"
+            convert "$tmpicon" -resize 64x64 "$tmpicon"
+            convert "$tmpicon" -gravity South -fill '#c0bfbd' -font DejaVu-Sans-Condensed -background '#0000' -pointsize 16 -splice 0x24  -annotate +0+2 "+12h" "$tmpicon"
             
             # at least +20 y height to be above typical taskbar
             convert -depth 8 -gravity SouthEast -geometry +$((330-(i+1)*64))+20 "$tmpimage" "$tmpicon" -composite "$tmpimage"          

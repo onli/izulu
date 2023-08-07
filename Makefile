@@ -21,9 +21,9 @@ lang/%.mo: lang/%.po
 all: $(MANPAGES) $(LANGFILES)
 
 install: 
-	@install -d "$(DESTDIR)$(BINDIR)" "$(DESTDIR)$(APPDIR)" "$(DESTDIR)$(MANDIR)/man1" "$(DESTDIR)$(DOCDIR)/izulu" "$(DESTDIR)$(LANGDIR_EN)" "$(DESTDIR)$(LANGDIR_DE)"
+	@install -d "$(DESTDIR)$(BINDIR)" "$(DESTDIR)$(APPDIR)" "$(DESTDIR)$(APPDIR)/weathericons" "$(DESTDIR)$(MANDIR)/man1" "$(DESTDIR)$(DOCDIR)/izulu" "$(DESTDIR)$(LANGDIR_EN)" "$(DESTDIR)$(LANGDIR_DE)"
 	@install -m 0755 -v izulu "$(DESTDIR)$(BINDIR)/izulu"
-	@install -m 0644 -v gfx/forecast* "$(DESTDIR)$(APPDIR)/"
+	@install -m 0644 -v gfx/weathericons/* "$(DESTDIR)$(APPDIR)/weathericons/"
 	@install -m 0644 -v gfx/gen_* "$(DESTDIR)$(APPDIR)/"
 	@install -m 0644 -v doc/izulu.1.gz "$(DESTDIR)$(MANDIR)/man1/izulu.1.gz"
 	@install -m 0644 -v doc/credits.txt "$(DESTDIR)$(DOCDIR)/"
