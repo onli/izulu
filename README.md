@@ -5,9 +5,9 @@ Weather aware desktop background images
 
 Izulu is a script that fetches the current weather from brightsky and changes the desktop background accordingly.
 
-It can also show the weather forecast (from met.no) and the current temperature (brightsky). As much as possible is detected automatically, like the command to change the background or the current position (via location.services.mozilla.com).
+It can also show the weather forecast (from met.no) and the current temperature (brightsky). As much as possible is detected automatically, like the command to change the background or the current position (via location.services.mozilla.com). So this is based on data from MET Norway and the Deutscher Wetterdienst.
 
-The forecast feature uses the [MET Weather API icons](https://github.com/metno/weathericons) (MIT).
+The forecast feature uses the [MET Weather API icons](https://github.com/metno/weathericons) (MIT). 
 
 ## Install
 
