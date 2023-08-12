@@ -7,7 +7,13 @@ msgstr "Weather: Mostly Sunny"
 msgid "clear"
 msgstr "Weather: Clear"
 
-msgid "partly_cloudy"
+msgid "clear-night"
+msgstr "Wetter: Clear"
+
+msgid "partly-cloudy"
+msgstr "Weather: Partly Cloudy"
+
+msgid "partly-cloudy-night"
 msgstr "Weather: Partly Cloudy"
 
 msgid "mostly_cloudy"

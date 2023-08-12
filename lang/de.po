@@ -7,7 +7,13 @@ msgstr "Wetter: Überwiegend sonnig"
 msgid "clear"
 msgstr "Wetter: Sonnig"
 
-msgid "partly_cloudy"
+msgid "clear-night"
+msgstr "Wetter: Unbedeckt"
+
+msgid "partly-cloudy"
+msgstr "Wetter: Leicht bewölkt"
+
+msgid "partly-cloudy-night"
 msgstr "Wetter: Leicht bewölkt"
 
 msgid "mostly_cloudy"
