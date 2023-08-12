@@ -348,7 +348,7 @@ while [[ $# -gt 0 ]] ; do
             ;;
 
         --version)
-            echo "izulu 2.0"
+            echo "izulu 2.0.1"
             exit 0
             ;;
     esac
