@@ -26,7 +26,6 @@ install:
 	@install -m 0644 -v gfx/weathericons/* "$(DESTDIR)$(APPDIR)/weathericons/"
 	@install -m 0644 -v gfx/gen_* "$(DESTDIR)$(APPDIR)/"
 	@install -m 0644 -v doc/izulu.1.gz "$(DESTDIR)$(MANDIR)/man1/izulu.1.gz"
-	@install -m 0644 -v doc/credits.txt "$(DESTDIR)$(DOCDIR)/"
 	@install -m 0644 -v lang/en.mo "$(DESTDIR)$(LANGDIR_EN)/izulu.mo"
 	@install -m 0644 -v lang/de.mo "$(DESTDIR)$(LANGDIR_DE)/izulu.mo"
 
