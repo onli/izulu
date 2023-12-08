@@ -160,13 +160,9 @@ setImage() {
             local tmpicon=$(mktemp)
             cp "/usr/share/izulu/weathericons/$icon.png" "$tmpicon"
             convert "$tmpicon" -resize 64x64 "$tmpicon"
-            convert "$tmpicon" -gravity South -fill '#E4E4E4' -font DejaVu-Sans-Condensed -background 'transparent' -pointsize 20 -splice 0x22 -annotate +0+4 "+12h" \
-                \( +clone -background '#424242'  -shadow 100x3+0+0 \
-                -channel A -level 0,50% +channel \) +swap \
-                +repage -gravity center -composite "$tmpicon"
             
             # at least +20 y height to be above typical taskbar
-            convert -depth 8 -gravity SouthEast -geometry +$((260-(i+1)*64))+20 "$tmpimage" "$tmpicon" -composite "$tmpimage"          
+            convert -depth 8 -gravity SouthEast -geometry +$((260-(i+1)*64))+30 "$tmpimage" "$tmpicon" -composite "$tmpimage"          
         done
     fi
 
