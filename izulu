@@ -35,7 +35,7 @@ setWeatherData() {
 
 # Set global LATITUDE and LONGITUDE, to be called at program start if not manually supplied
 setCoordinates() {
-    local coords=$(fetchUrl "https://location.services.mozilla.com/v1/geolocate?key=geoclue")
+    local coords=$(wget --user-agent="izulu" --method=POST -q -O - "https://api.beacondb.net/v1/geolocate?key=geoclue")
     LATITUDE=$(echo "$coords" | jq -r '.location.lat')
     LONGITUDE=$(echo "$coords" | jq -r '.location.lng')
 }
@@ -344,7 +344,7 @@ while [[ $# -gt 0 ]] ; do
             ;;
 
         --version)
-            echo "izulu 2.0.1"
+            echo "izulu 2.1.0"
             exit 0
             ;;
     esac
