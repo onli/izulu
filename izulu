@@ -151,6 +151,10 @@ setImage() {
     cp "$1"  "$tmpimage"
     local resolution=$(xdpyinfo | grep dimensions | awk '{ print $2 }')
     convert "$tmpimage" -resize "$resolution" "$tmpimage"
+    local weather="$(getWeather)"
+    local trayicon="weather-clear"
+    local traytext="$weather"
+    
     if [ "$FORECAST" == "TRUE" ];then
         local url="https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=$LATITUDE&lon=$LONGITUDE"
         local forecastData=$(fetchUrl "$url")
@@ -158,6 +162,9 @@ setImage() {
             # merge forecast-icons with background-image
             local icon=$(echo "$forecastData" | jq -r '.properties.timeseries['$(($i * 12))'].data.next_12_hours.summary.symbol_code')
             local tmpicon=$(mktemp)
+            if [ "$i" == 0 ];then
+                trayicon="$tmpicon"
+            fi
             cp "/usr/share/izulu/weathericons/$icon.png" "$tmpicon"
             convert "$tmpicon" -resize 64x64 "$tmpicon"
             
@@ -168,6 +175,7 @@ setImage() {
 
     if [ "$TEMPERATURE" == "TRUE" ];then
         local temperature=$(echo "$WEATHER_DATA" | jq -r '.weather.temperature')
+        traytext="$traytext, $temperature"
         convert "$tmpimage" \
             \( -size "90x60" -gravity NorthEast -background none -font DejaVu-Sans-Condensed -pointsize 36 -fill "#E4E4E4" -extent 95 caption:"${temperature%.*}°C" \
             \( +clone -background "#424242" -shadow 90x3-6+1 -gravity NorthEast \) +swap -background none -layers merge +repage \) \
@@ -181,7 +189,9 @@ setImage() {
     else
         $WPCOMMAND "$HOME/.izulu/izulucurrent" &
     fi
-    osdNotify $(getWeather)
+    osdNotify $weather
+    trayUpdate "$traytext" "$trayicon"
+    
 }
 
 contains() {
@@ -195,7 +205,7 @@ contains() {
 }
 
 # send onscreen-notfication if weather changed
-# $1: message, new weather-state
+# $1: message, new weather state
 osdNotify() {
     if [ "$OSD" == "TRUE" ];then
         if [[ -z "$last_state" ]] || [ "$last_state" != "$1" ];then
@@ -210,6 +220,45 @@ osdNotify() {
     fi
 }
 
+# Create the tray icon, or update the tray icon if weather changed
+# $1: traytext, new weather state to show
+# $2: trayicon, new weather icon to show
+trayUpdate() {
+    if [ "$TRAYICON" == "TRUE" ];then
+        if command -v yad > /dev/null;then
+            if [[ -z "$last_tray_state" ]];then
+                # The tray icon has not been created yet, which we will do now with the needed
+                # pipe to update it later
+                TRAYPIPE=$(mktemp)
+                rm "$TRAYPIPE"
+                mkfifo "$TRAYPIPE"
+                exec 3<> "$TRAYPIPE"
+
+                yad_cancel () {
+                    kill -USR1 "$YAD_PID"  # remove the tray icon
+                    kill -USR1 "$IZULU_PID"         # also end izulu
+                }
+                export -f yad_cancel
+                export IZULU_PID
+                
+                yad --notification --image="$2" --command="echo 'Hello World'" --text="$1" --menu="Exit !bash -c 'yad_cancel'" --listen <&3 &
+                unset yad-cancel
+                unset IZULU_PID
+            else
+                if [ "$last_tray_state" != "$1" ];then
+                    # We have new info to show in the tray icon
+                    echo "icon:$2" >&3 
+                    echo "tooltip:$1" >&3
+                fi
+            fi
+        else
+            echo "yad not installed, but tray icon via -i requested." \
+                 "Install yad to show a tray ."
+        fi
+        
+        last_tray_state="$1"
+    fi
+}
 
 
 
@@ -297,6 +346,9 @@ while [[ $# -gt 0 ]] ; do
         -d | --daemon)
             DAEMON=TRUE
             ;;
+        -i | --icon)
+            TRAYICON=TRUE
+            ;;
         -n | --night)
             NIGHT=TRUE
             ;;
@@ -334,6 +386,8 @@ while [[ $# -gt 0 ]] ; do
     Add images showing the weather forecast.
 -t, --temperature
     Show the temperature.
+-i, --icon
+    Show a tray icon with the current weather data.
 -tg gravity, --temperature-gravity gravity
     Set the gravity anchor of the temperature display. Possible choices are NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast. See also http://www.imagemagick.org/script/command-line-options.php#gravity
 -tm margin, --temperature-margin margin
@@ -354,6 +408,7 @@ TEXTDOMAIN="izulu"
 TEXTDOMAINDIR="/usr/share/locale/"
 export TEXTDOMAIN
 export TEXTDOMAINDIR
+IZULU_PID=$$
 
 if [ "$WPCOMMAND" == "" ];then
     WPCOMMAND="$(getWPCommand)"
