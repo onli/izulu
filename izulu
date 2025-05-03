@@ -242,6 +242,7 @@ trayUpdate() {
                 export IZULU_PID
                 
                 yad --notification --image="$2" --command="echo 'Hello World'" --text="$1" --menu="Exit !bash -c 'yad_cancel'" --listen <&3 &
+                YAD_PID="$!"
                 unset yad-cancel
                 unset IZULU_PID
             else
@@ -421,6 +422,14 @@ if [ -z "$LATITUDE" ];then
         exit 1
     fi
 fi
+
+cleanup() {
+    if [ "$TRAYICON" == "TRUE" ];then
+        kill -USR1 "$YAD_PID"
+    fi
+}
+
+trap cleanup EXIT
 
 setWeatherData
 chooseWallpaper "$(getWeather)"
