@@ -161,11 +161,12 @@ setImage() {
         for i in {0..3};do
             # merge forecast-icons with background-image
             local icon=$(echo "$forecastData" | jq -r '.properties.timeseries['$(($i * 12))'].data.next_12_hours.summary.symbol_code')
-            local tmpicon=$(mktemp)
-            if [ "$i" == 0 ];then
-                trayicon="$tmpicon"
-            fi
+            local tmpicon=$(mktemp --suffix=.png)
             cp "/usr/share/izulu/weathericons/$icon.png" "$tmpicon"
+            if [ "$i" == 0 ];then
+                trayicon="$(mktemp --suffix=.png)"
+                convert "$tmpicon" -resize 16x16 -trim "$trayicon"
+            fi
             convert "$tmpicon" -resize 64x64 "$tmpicon"
             
             # at least +20 y height to be above typical taskbar
@@ -190,8 +191,7 @@ setImage() {
         $WPCOMMAND "$HOME/.izulu/izulucurrent" &
     fi
     osdNotify $weather
-    trayUpdate "$traytext" "$trayicon"
-    
+    trayUpdate "$traytext" "$trayicon"    
 }
 
 contains() {
